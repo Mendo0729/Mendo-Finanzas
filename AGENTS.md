@@ -2,11 +2,17 @@
 
 ## Arquitectura
 
-- Mantener una arquitectura MVC modular.
+- Mantener un monolito modular organizado por funcionalidad dentro de `src/modules`.
 - Usar JavaScript moderno con ES Modules.
 - Usar nombres técnicos, variables, funciones y archivos en inglés.
 - Usar mensajes visibles para el usuario en español.
 - Mantener `src/app.js` separado de `src/server.js`.
+- Registrar middlewares y rutas desde `src/bootstrap`.
+- Mantener el flujo `routes -> controller -> service -> repository -> Prisma`.
+- Los controladores no deben importar Prisma ni contener reglas financieras.
+- Los repositorios deben contener consultas explícitas; no crear un repositorio genérico global.
+- Crear únicamente las capas que el módulo necesite realmente.
+- Consultar `docs/backend-architecture.md` antes de incorporar un módulo nuevo.
 - No desplegar ni conectarse a Aiven, Render o Cloudflare sin una instrucción explícita.
 
 ## Seguridad
@@ -14,9 +20,10 @@
 - No guardar secretos, contraseñas, tokens ni archivos `.env` en el repositorio.
 - No almacenar secretos TOTP en texto plano.
 - Los códigos de recuperación deben almacenarse como hash.
-- No registrar contraseñas, tokens, secretos TOTP ni cuerpos sensibles en logs.
+- No registrar contraseñas, tokens, secretos TOTP, cookies ni cuerpos sensibles en logs.
 - Toda consulta financiera debe limitarse por `householdId` y membresía.
 - No confiar únicamente en identificadores enviados por el navegador.
+- Propagar el `requestId` en errores y registros sin aceptar valores de cabecera inválidos.
 
 ## Datos financieros
 
@@ -40,6 +47,7 @@
 ## Calidad
 
 - Ejecutar `npm run check` antes de considerar una tarea terminada.
+- Ejecutar las pruebas unitarias, de integración o HTTP relevantes para el cambio.
 - Mantener actualizado `package-lock.json` cuando cambien dependencias.
 - Agregar pruebas para nuevas reglas de negocio y controles de autorización.
 - No simular validaciones que no pudieron ejecutarse.
