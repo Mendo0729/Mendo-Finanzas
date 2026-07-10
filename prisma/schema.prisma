@@ -1,0 +1,221 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              BigInt    @id @default(autoincrement())
+  name            String    @db.VarChar(100)
+  email           String    @unique @db.VarChar(254)
+  passwordHash    String    @map("password_hash") @db.VarChar(255)
+  status          Int       @default(1) @db.SmallInt
+  emailVerifiedAt DateTime? @map("email_verified_at") @db.Timestamptz(6)
+  lastLoginAt     DateTime? @map("last_login_at") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  mfa                 UserMfa?
+  recoveryCodes       RecoveryCode[]
+  createdHouseholds   Household[]       @relation("HouseholdCreator")
+  memberships         HouseholdMember[]
+  createdTransactions Transaction[]     @relation("TransactionCreator")
+  authTokens          AuthToken[]
+  auditLogs           AuditLog[]
+
+  @@map("users")
+}
+
+model UserMfa {
+  userId              BigInt    @id @map("user_id")
+  enabled             Boolean   @default(false)
+  totpSecretEncrypted Bytes?    @map("totp_secret_encrypted")
+  enabledAt           DateTime? @map("enabled_at") @db.Timestamptz(6)
+  lastVerifiedAt      DateTime? @map("last_verified_at") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_mfa")
+}
+
+model RecoveryCode {
+  id        BigInt    @id @default(autoincrement())
+  userId    BigInt    @map("user_id")
+  codeHash  String    @map("code_hash") @db.Char(64)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("recovery_codes")
+}
+
+model Household {
+  id        BigInt   @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  currency  String   @default("USD") @db.Char(3)
+  createdBy BigInt   @map("created_by")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  creator      User              @relation("HouseholdCreator", fields: [createdBy], references: [id])
+  members      HouseholdMember[]
+  accounts     Account[]
+  categories   Category[]
+  transactions Transaction[]
+  budgets      Budget[]
+  auditLogs    AuditLog[]
+
+  @@unique([createdBy, name])
+  @@map("households")
+}
+
+model HouseholdMember {
+  householdId BigInt   @map("household_id")
+  userId      BigInt   @map("user_id")
+  role        Int      @db.SmallInt
+  joinedAt    DateTime @default(now()) @map("joined_at") @db.Timestamptz(6)
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([householdId, userId])
+  @@index([userId, householdId])
+  @@map("household_members")
+}
+
+model Account {
+  id             BigInt   @id @default(autoincrement())
+  householdId    BigInt   @map("household_id")
+  name           String   @db.VarChar(100)
+  accountType    Int      @map("account_type") @db.SmallInt
+  currency       String   @default("USD") @db.Char(3)
+  initialBalance Decimal  @default(0) @map("initial_balance") @db.Decimal(14, 2)
+  creditLimit    Decimal? @map("credit_limit") @db.Decimal(14, 2)
+  closingDay     Int?     @map("closing_day") @db.SmallInt
+  paymentDay     Int?     @map("payment_day") @db.SmallInt
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  household   Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([householdId, name])
+  @@map("accounts")
+}
+
+model Category {
+  id           BigInt   @id @default(autoincrement())
+  householdId  BigInt   @map("household_id")
+  name         String   @db.VarChar(60)
+  categoryType Int      @map("category_type") @db.SmallInt
+  icon         String?  @db.VarChar(40)
+  isDefault    Boolean  @default(false) @map("is_default")
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  household   Household     @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  budgets      Budget[]
+
+  @@unique([householdId, categoryType, name])
+  @@map("categories")
+}
+
+model Transaction {
+  id              BigInt    @id @default(autoincrement())
+  householdId     BigInt    @map("household_id")
+  accountId       BigInt    @map("account_id")
+  categoryId      BigInt?   @map("category_id")
+  createdBy       BigInt    @map("created_by")
+  transactionType Int       @map("transaction_type") @db.SmallInt
+  amount          Decimal   @db.Decimal(14, 2)
+  description     String    @db.VarChar(160)
+  notes           String?   @db.VarChar(1000)
+  transactionDate DateTime  @map("transaction_date") @db.Date
+  status          Int       @default(1) @db.SmallInt
+  transferGroupId String?   @map("transfer_group_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  account   Account   @relation(fields: [accountId], references: [id])
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  creator   User      @relation("TransactionCreator", fields: [createdBy], references: [id])
+
+  @@index([householdId, transactionDate])
+  @@index([accountId, transactionDate])
+  @@index([categoryId, transactionDate])
+  @@index([transferGroupId])
+  @@map("transactions")
+}
+
+model Budget {
+  id          BigInt   @id @default(autoincrement())
+  householdId BigInt   @map("household_id")
+  categoryId  BigInt   @map("category_id")
+  monthStart  DateTime @map("month_start") @db.Date
+  amount      Decimal  @db.Decimal(14, 2)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  category  Category  @relation(fields: [categoryId], references: [id])
+
+  @@unique([householdId, categoryId, monthStart])
+  @@index([householdId, monthStart])
+  @@map("budgets")
+}
+
+model AuthToken {
+  id        BigInt    @id @default(autoincrement())
+  userId    BigInt    @map("user_id")
+  tokenType Int       @map("token_type") @db.SmallInt
+  tokenHash String    @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(6)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([expiresAt])
+  @@map("auth_tokens")
+}
+
+model Session {
+  sid    String   @id @db.VarChar(255)
+  sess   Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire])
+  @@map("sessions")
+}
+
+model AuditLog {
+  id          BigInt   @id @default(autoincrement())
+  userId      BigInt?  @map("user_id")
+  householdId BigInt?  @map("household_id")
+  action      Int      @db.SmallInt
+  entityType  Int?     @map("entity_type") @db.SmallInt
+  entityId    BigInt?  @map("entity_id")
+  ipAddress   String?  @map("ip_address") @db.Inet
+  userAgent   String?  @map("user_agent") @db.VarChar(255)
+  metadata    Json?
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  household Household? @relation(fields: [householdId], references: [id], onDelete: SetNull)
+
+  @@index([householdId, createdAt])
+  @@index([userId, createdAt])
+  @@index([createdAt])
+  @@map("audit_logs")
+}

@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: mendo_finanzas_dev
+          POSTGRES_USER: mendo_dev
+          POSTGRES_PASSWORD: mendo_dev_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U mendo_dev -d mendo_finanzas_dev"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      NODE_ENV: test
+      PORT: 3000
+      APP_URL: http://127.0.0.1:3000
+      DATABASE_URL: postgresql://mendo_dev:mendo_dev_ci@127.0.0.1:5432/mendo_finanzas_dev?schema=public
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Generate Prisma Client
+        run: npm run prisma:generate
+
+      - name: Validate Prisma schema
+        run: npm run prisma:validate
+
+      - name: Apply database migrations
+        run: npm run prisma:deploy
+
+      - name: Load development seed twice
+        run: |
+          npm run db:seed
+          npm run db:seed
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run database integration tests
+        run: npm run test:db
+
+      - name: Smoke test application
+        shell: bash
+        run: |
+          npm start > app.log 2>&1 &
+          app_pid=$!
+          trap 'kill "$app_pid" 2>/dev/null || true; cat app.log' EXIT
+
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3000/health > health.json; then
+              break
+            fi
+            sleep 1
+          done
+
+          grep -q '"status":"ok"' health.json
+          grep -q '"database":"up"' health.json
+          curl --fail --silent http://127.0.0.1:3000/ | grep -q 'Mendo Finanzas'

@@ -1,0 +1,26 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: mendo-finanzas-db-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mendo_finanzas_dev}
+      POSTGRES_USER: ${POSTGRES_USER:-mendo_dev}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_this_local_password}
+    ports:
+      - '${POSTGRES_PORT:-55433}:5432'
+    volumes:
+      - mendo_finanzas_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-mendo_dev} -d ${POSTGRES_DB:-mendo_finanzas_dev}',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+volumes:
+  mendo_finanzas_dev_data:

@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+    <%- include('../partials/navbar') %>
+
+    <main class="container py-5 text-center flex-grow-1">
+      <p class="display-1 fw-bold text-danger mb-2">500</p>
+      <h1 class="h2">Ocurrió un error interno</h1>
+      <p class="text-body-secondary">
+        La solicitud no pudo procesarse. Intenta nuevamente más tarde.
+      </p>
+
+      <% if (errorMessage) { %>
+        <div class="alert alert-warning text-start mx-auto" style="max-width: 48rem" role="alert">
+          <strong>Detalle de desarrollo:</strong> <%= errorMessage %>
+        </div>
+      <% } %>
+
+      <a class="btn btn-primary" href="/">Volver al inicio</a>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>
