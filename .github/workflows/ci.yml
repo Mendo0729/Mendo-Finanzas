@@ -34,6 +34,7 @@ jobs:
       PORT: 3000
       APP_URL: http://127.0.0.1:3000
       DATABASE_URL: postgresql://mendo_dev:mendo_dev_ci@127.0.0.1:5432/mendo_finanzas_dev?schema=public
+      SESSION_SECRET: ci_only_session_secret_with_at_least_32_characters
 
     steps:
       - name: Checkout
@@ -94,3 +95,4 @@ jobs:
           grep -q '"status":"ok"' health.json
           grep -q '"database":"up"' health.json
           curl --fail --silent http://127.0.0.1:3000/ | grep -q 'Mendo Finanzas'
+          curl --fail --silent http://127.0.0.1:3000/auth/login | grep -q 'Iniciar sesión'
