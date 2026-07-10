@@ -1,0 +1,33 @@
+name: Generate auth lockfile
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  generate-lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Generate lockfile with authentication dependencies
+        run: npm install --package-lock-only --ignore-scripts --save-exact argon2@0.45.0 express-session@1.19.0
+
+      - name: Upload generated lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: authentication-lockfile
+          path: package-lock.json
+          if-no-files-found: error
+          retention-days: 1
