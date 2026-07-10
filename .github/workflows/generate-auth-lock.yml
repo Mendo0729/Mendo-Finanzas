@@ -4,16 +4,19 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate-lockfile:
+    if: github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
     steps:
-      - name: Checkout
+      - name: Checkout pull request branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
 
       - name: Configure Node.js
         uses: actions/setup-node@v4
@@ -21,15 +24,18 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Generate lockfile with authentication dependencies
-        run: npm install --package-lock-only --ignore-scripts --save-exact argon2 express-session
+      - name: Generate and commit authentication dependencies
+        shell: bash
+        run: |
+          if grep -q '"argon2": "0.44.0"' package-lock.json; then
+            echo "Authentication dependencies are already locked."
+            exit 0
+          fi
 
-      - name: Upload generated dependency files
-        uses: actions/upload-artifact@v4
-        with:
-          name: authentication-dependencies
-          path: |
-            package.json
-            package-lock.json
-          if-no-files-found: error
-          retention-days: 1
+          npm install --package-lock-only --ignore-scripts --save-exact argon2@0.44.0 express-session@1.19.0
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "chore: lock authentication dependencies"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
