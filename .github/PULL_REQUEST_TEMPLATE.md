@@ -4,7 +4,7 @@ Describe el problema o capacidad que resuelve este cambio.
 
 ## Cambios
 
-- 
+- Describe los cambios principales.
 
 ## Validaciones
 
