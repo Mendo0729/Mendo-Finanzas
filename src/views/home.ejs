@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= pageTitle %> | Mendo Finanzas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/app.css" />
+  </head>
+  <body class="bg-body-tertiary">
+    <main class="container py-5">
+      <section class="rounded-4 bg-white p-5 shadow-sm">
+        <span class="badge text-bg-primary mb-3">Entorno inicial</span>
+        <h1 class="display-5 fw-bold">Mendo Finanzas</h1>
+        <p class="lead">La estructura Node.js, Express, EJS, Prisma y PostgreSQL está preparada.</p>
+        <dl class="row mb-4">
+          <dt class="col-sm-3">Aplicación</dt><dd class="col-sm-9 text-success">Activa</dd>
+          <dt class="col-sm-3">Base de datos</dt><dd class="col-sm-9"><%= databaseStatus === 'up' ? 'Disponible' : 'No disponible' %></dd>
+          <dt class="col-sm-3">Entorno</dt><dd class="col-sm-9"><%= environment %></dd>
+        </dl>
+        <a class="btn btn-primary" href="/health">Consultar estado</a>
+      </section>
+    </main>
+  </body>
+</html>
