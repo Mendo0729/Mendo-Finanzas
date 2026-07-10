@@ -148,7 +148,7 @@ model Transaction {
 
   household Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   account   Account   @relation(fields: [accountId], references: [id])
-  category  Category? @relation(fields: [categoryId], references: [id])
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   creator   User      @relation("TransactionCreator", fields: [createdBy], references: [id])
 
   @@index([householdId, transactionDate])
