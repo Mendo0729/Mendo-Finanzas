@@ -3,13 +3,7 @@ import globals from 'globals';
 
 export default [
   {
-    ignores: [
-      'node_modules/**',
-      'coverage/**',
-      'logs/**',
-      'prisma/migrations/**',
-      'src/public/**',
-    ],
+    ignores: ['node_modules/**', 'coverage/**', 'logs/**', 'prisma/migrations/**', 'src/public/**'],
   },
   {
     files: ['**/*.js'],
@@ -22,8 +16,8 @@ export default [
       },
     },
     rules: {
-      'curly': ['error', 'all'],
-      'eqeqeq': ['error', 'always'],
+      curly: ['error', 'all'],
+      eqeqeq: ['error', 'always'],
       'no-duplicate-imports': 'error',
       'no-unused-vars': [
         'error',
