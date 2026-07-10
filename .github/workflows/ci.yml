@@ -7,7 +7,7 @@ on:
       - main
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   validate:
@@ -37,39 +37,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
-
-      - name: Detect missing package lock
-        id: lock
-        shell: bash
-        run: |
-          if [[ -f package-lock.json ]]; then
-            echo "missing=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "missing=true" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Configure Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
-
-      - name: Commit generated package lock
-        if: >-
-          steps.lock.outputs.missing == 'true' &&
-          github.event_name == 'pull_request' &&
-          github.event.pull_request.head.repo.full_name == github.repository
-        shell: bash
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package-lock.json
-          git commit -m "chore: add package lock"
-          git push origin "HEAD:${{ github.head_ref }}"
+        run: npm ci --no-audit --no-fund
 
       - name: Generate Prisma Client
         run: npm run prisma:generate
@@ -82,6 +58,9 @@ jobs:
 
       - name: Load development seed
         run: npm run db:seed
+
+      - name: Check formatting
+        run: npm run format:check
 
       - name: Run ESLint
         run: npm run lint
