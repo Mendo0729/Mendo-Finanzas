@@ -1,11 +1,11 @@
-import { randomUUID } from 'node:crypto';
-
 import { Prisma, PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 const USER_STATUS_ACTIVE = 1;
 const ROLE_OWNER = 1;
+const SEED_PREFIX = '[SEED]';
+const SEED_TRANSFER_GROUP_ID = '11111111-1111-4111-8111-111111111111';
 
 const ACCOUNT_TYPES = Object.freeze({
   CASH: 1,
@@ -257,196 +257,140 @@ async function seedBudgets(householdId, categories) {
   }
 }
 
-async function seedTransactions(householdId, userId, accounts, categories) {
-  await prisma.transaction.deleteMany({
-    where: {
-      householdId,
-      description: { startsWith: '[SEED]' },
-    },
-  });
-
+function buildTransactionDefinitions(accounts, categories) {
   const checking = accounts.get('Cuenta corriente');
   const savings = accounts.get('Cuenta de ahorro');
-  const cash = accounts.get('Efectivo');
   const creditCard = accounts.get('Tarjeta Visa');
-  const wallet = accounts.get('Billetera digital');
-  const transferGroupId = randomUUID();
 
-  const transactions = [
-    {
-      accountId: checking.id,
-      categoryId: categories.get('Salario').id,
-      transactionType: TRANSACTION_TYPES.INCOME,
-      amount: decimal('1850.00'),
-      description: '[SEED] Salario mensual',
-      transactionDate: currentMonthDate(1),
-    },
-    {
-      accountId: checking.id,
-      categoryId: categories.get('Trabajo adicional').id,
-      transactionType: TRANSACTION_TYPES.INCOME,
-      amount: decimal('250.00'),
-      description: '[SEED] Trabajo independiente',
-      transactionDate: currentMonthDate(3),
-    },
-    {
-      accountId: creditCard.id,
-      categoryId: categories.get('Alimentación').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('86.42'),
-      description: '[SEED] Supermercado',
-      transactionDate: currentMonthDate(4),
-    },
-    {
-      accountId: checking.id,
-      categoryId: categories.get('Vivienda').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('650.00'),
-      description: '[SEED] Alquiler',
-      transactionDate: currentMonthDate(5),
-    },
-    {
-      accountId: wallet.id,
-      categoryId: categories.get('Transporte').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('18.50'),
-      description: '[SEED] Transporte',
-      transactionDate: currentMonthDate(6),
-    },
-    {
-      accountId: checking.id,
-      categoryId: categories.get('Servicios').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('45.00'),
-      description: '[SEED] Internet',
-      transactionDate: currentMonthDate(7),
-    },
-    {
-      accountId: creditCard.id,
-      categoryId: categories.get('Salud').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('32.75'),
-      description: '[SEED] Farmacia',
-      transactionDate: currentMonthDate(8),
-    },
-    {
-      accountId: creditCard.id,
-      categoryId: categories.get('Educación').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('24.99'),
-      description: '[SEED] Curso en línea',
-      transactionDate: currentMonthDate(9),
-    },
-    {
-      accountId: cash.id,
-      categoryId: categories.get('Entretenimiento').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('22.00'),
-      description: '[SEED] Cine',
-      transactionDate: currentMonthDate(10),
-    },
-    {
-      accountId: creditCard.id,
-      categoryId: categories.get('Compras').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('58.30'),
-      description: '[SEED] Compra para el hogar',
-      transactionDate: currentMonthDate(11),
-    },
-    {
-      accountId: checking.id,
-      categoryId: categories.get('Deudas').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('125.00'),
-      description: '[SEED] Pago de préstamo',
-      transactionDate: currentMonthDate(12),
-    },
-    {
-      accountId: creditCard.id,
-      categoryId: categories.get('Suscripciones').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('15.99'),
-      description: '[SEED] Suscripción mensual',
-      transactionDate: currentMonthDate(13),
-    },
-    {
-      accountId: creditCard.id,
-      categoryId: categories.get('Alimentación').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('42.15'),
-      description: '[SEED] Restaurante',
-      transactionDate: currentMonthDate(14),
-    },
-    {
-      accountId: wallet.id,
-      categoryId: categories.get('Transporte').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('12.25'),
-      description: '[SEED] Viaje local',
-      transactionDate: currentMonthDate(15),
-    },
-    {
-      accountId: checking.id,
-      categoryId: categories.get('Servicios').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('37.60'),
-      description: '[SEED] Electricidad',
-      transactionDate: currentMonthDate(16),
-    },
-    {
-      accountId: cash.id,
-      categoryId: categories.get('Compras').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('19.90'),
-      description: '[SEED] Artículos personales',
-      transactionDate: currentMonthDate(17),
-    },
-    {
-      accountId: checking.id,
-      categoryId: null,
-      transactionType: TRANSACTION_TYPES.TRANSFER_OUT,
-      amount: decimal('300.00'),
-      description: '[SEED] Transferencia a ahorro',
-      transactionDate: currentMonthDate(18),
-      transferGroupId,
-    },
-    {
-      accountId: savings.id,
-      categoryId: null,
-      transactionType: TRANSACTION_TYPES.TRANSFER_IN,
-      amount: decimal('300.00'),
-      description: '[SEED] Transferencia desde cuenta corriente',
-      transactionDate: currentMonthDate(18),
-      transferGroupId,
-    },
-    {
-      accountId: creditCard.id,
-      categoryId: categories.get('Alimentación').id,
-      transactionType: TRANSACTION_TYPES.EXPENSE,
-      amount: decimal('64.80'),
-      description: '[SEED] Compra pendiente',
-      transactionDate: currentMonthDate(19),
-      status: TRANSACTION_STATUS.PENDING,
-    },
-    {
-      accountId: checking.id,
-      categoryId: categories.get('Reembolso').id,
-      transactionType: TRANSACTION_TYPES.INCOME,
-      amount: decimal('40.00'),
-      description: '[SEED] Reembolso recibido',
-      transactionDate: currentMonthDate(20),
-    },
-  ];
-
-  await prisma.transaction.createMany({
-    data: transactions.map((transaction) => ({
-      householdId,
-      createdBy: userId,
+  return [
+    ['Cuenta corriente', 'Salario', 1, '1850.00', 'Salario mensual', 1],
+    ['Cuenta corriente', 'Trabajo adicional', 1, '250.00', 'Trabajo independiente', 3],
+    ['Tarjeta Visa', 'Alimentación', 2, '86.42', 'Supermercado', 4],
+    ['Cuenta corriente', 'Vivienda', 2, '650.00', 'Alquiler', 5],
+    ['Billetera digital', 'Transporte', 2, '18.50', 'Transporte', 6],
+    ['Cuenta corriente', 'Servicios', 2, '45.00', 'Internet', 7],
+    ['Tarjeta Visa', 'Salud', 2, '32.75', 'Farmacia', 8],
+    ['Tarjeta Visa', 'Educación', 2, '24.99', 'Curso en línea', 9],
+    ['Efectivo', 'Entretenimiento', 2, '22.00', 'Cine', 10],
+    ['Tarjeta Visa', 'Compras', 2, '58.30', 'Compra para el hogar', 11],
+    ['Cuenta corriente', 'Deudas', 2, '125.00', 'Pago de préstamo', 12],
+    ['Tarjeta Visa', 'Suscripciones', 2, '15.99', 'Suscripción mensual', 13],
+    ['Tarjeta Visa', 'Alimentación', 2, '42.15', 'Restaurante', 14],
+    ['Billetera digital', 'Transporte', 2, '12.25', 'Viaje local', 15],
+    ['Cuenta corriente', 'Servicios', 2, '37.60', 'Electricidad', 16],
+    ['Efectivo', 'Compras', 2, '19.90', 'Artículos personales', 17],
+  ]
+    .map(([accountName, categoryName, transactionType, amount, description, day]) => ({
+      accountId: accounts.get(accountName).id,
+      categoryId: categories.get(categoryName).id,
+      transactionType,
+      amount: decimal(amount),
+      description: `${SEED_PREFIX} ${description}`,
+      transactionDate: currentMonthDate(day),
       status: TRANSACTION_STATUS.CONFIRMED,
-      notes: null,
       transferGroupId: null,
-      ...transaction,
-    })),
+    }))
+    .concat([
+      {
+        accountId: checking.id,
+        categoryId: null,
+        transactionType: TRANSACTION_TYPES.TRANSFER_OUT,
+        amount: decimal('300.00'),
+        description: `${SEED_PREFIX} Transferencia a ahorro`,
+        transactionDate: currentMonthDate(18),
+        status: TRANSACTION_STATUS.CONFIRMED,
+        transferGroupId: SEED_TRANSFER_GROUP_ID,
+      },
+      {
+        accountId: savings.id,
+        categoryId: null,
+        transactionType: TRANSACTION_TYPES.TRANSFER_IN,
+        amount: decimal('300.00'),
+        description: `${SEED_PREFIX} Transferencia desde cuenta corriente`,
+        transactionDate: currentMonthDate(18),
+        status: TRANSACTION_STATUS.CONFIRMED,
+        transferGroupId: SEED_TRANSFER_GROUP_ID,
+      },
+      {
+        accountId: creditCard.id,
+        categoryId: categories.get('Alimentación').id,
+        transactionType: TRANSACTION_TYPES.EXPENSE,
+        amount: decimal('64.80'),
+        description: `${SEED_PREFIX} Compra pendiente`,
+        transactionDate: currentMonthDate(19),
+        status: TRANSACTION_STATUS.PENDING,
+        transferGroupId: null,
+      },
+      {
+        accountId: checking.id,
+        categoryId: categories.get('Reembolso').id,
+        transactionType: TRANSACTION_TYPES.INCOME,
+        amount: decimal('40.00'),
+        description: `${SEED_PREFIX} Reembolso recibido`,
+        transactionDate: currentMonthDate(20),
+        status: TRANSACTION_STATUS.CONFIRMED,
+        transferGroupId: null,
+      },
+    ]);
+}
+
+async function seedTransactions(householdId, userId, accounts, categories) {
+  const definitions = buildTransactionDefinitions(accounts, categories);
+  const expectedDescriptions = new Set(definitions.map(({ description }) => description));
+  const existingTransactions = await prisma.transaction.findMany({
+    where: {
+      householdId,
+      description: { startsWith: SEED_PREFIX },
+    },
+    orderBy: { id: 'asc' },
+  });
+  const existingByDescription = new Map();
+
+  for (const transaction of existingTransactions) {
+    const matches = existingByDescription.get(transaction.description) ?? [];
+    matches.push(transaction);
+    existingByDescription.set(transaction.description, matches);
+  }
+
+  await prisma.$transaction(async (database) => {
+    for (const definition of definitions) {
+      const matches = existingByDescription.get(definition.description) ?? [];
+      const [existing, ...duplicates] = matches;
+      const data = {
+        householdId,
+        createdBy: userId,
+        notes: null,
+        deletedAt: null,
+        ...definition,
+      };
+
+      if (existing) {
+        await database.transaction.update({
+          where: { id: existing.id },
+          data,
+        });
+      } else {
+        await database.transaction.create({ data });
+      }
+
+      if (duplicates.length > 0) {
+        await database.transaction.updateMany({
+          where: { id: { in: duplicates.map(({ id }) => id) } },
+          data: { deletedAt: new Date() },
+        });
+      }
+    }
+
+    const staleIds = existingTransactions
+      .filter(({ description }) => !expectedDescriptions.has(description))
+      .map(({ id }) => id);
+
+    if (staleIds.length > 0) {
+      await database.transaction.updateMany({
+        where: { id: { in: staleIds } },
+        data: { deletedAt: new Date() },
+      });
+    }
   });
 }
 
