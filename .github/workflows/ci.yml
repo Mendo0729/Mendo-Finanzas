@@ -57,14 +57,19 @@ jobs:
       - name: Apply database migrations
         run: npm run prisma:deploy
 
-      - name: Load development seed
-        run: npm run db:seed
+      - name: Load development seed twice
+        run: |
+          npm run db:seed
+          npm run db:seed
 
       - name: Check formatting
         run: npm run format:check
 
       - name: Run ESLint
         run: npm run lint
+
+      - name: Run database integration tests
+        run: npm run test:db
 
       - name: Smoke test application
         shell: bash
