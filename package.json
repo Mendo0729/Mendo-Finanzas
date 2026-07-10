@@ -10,10 +10,12 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "check": "npm run format:check && npm run lint && npm run prisma:validate",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "prisma:format": "prisma format",
     "prisma:generate": "prisma generate",
     "prisma:validate": "prisma validate",
     "prisma:migrate": "prisma migrate dev",
