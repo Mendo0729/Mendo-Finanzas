@@ -22,12 +22,14 @@ jobs:
           cache: npm
 
       - name: Generate lockfile with authentication dependencies
-        run: npm install --package-lock-only --ignore-scripts --save-exact argon2@0.45.0 express-session@1.19.0
+        run: npm install --package-lock-only --ignore-scripts --save-exact argon2 express-session
 
-      - name: Upload generated lockfile
+      - name: Upload generated dependency files
         uses: actions/upload-artifact@v4
         with:
-          name: authentication-lockfile
-          path: package-lock.json
+          name: authentication-dependencies
+          path: |
+            package.json
+            package-lock.json
           if-no-files-found: error
           retention-days: 1
