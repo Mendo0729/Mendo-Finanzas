@@ -234,6 +234,7 @@ Decisiones principales:
 - Secretos TOTP cifrados antes de almacenarse.
 - Códigos de recuperación almacenados como hash.
 - Archivos, recibos e imágenes fuera de PostgreSQL.
+- Categorías referenciadas por movimientos protegidas contra eliminación física.
 
 La migración inicial incluye restricciones `CHECK` para roles, tipos de cuenta, categorías, estados, montos positivos, días válidos y consistencia de transferencias.
 
@@ -243,10 +244,15 @@ La migración inicial incluye restricciones `CHECK` para roles, tipos de cuenta,
 .github/workflows/      Integración continua
 prisma/                 Esquema, migraciones y seed
 src/config/             Entorno y conexión a la base
+src/controllers/        Controladores HTTP
 src/middleware/         Manejo transversal de solicitudes
 src/routes/             Rutas HTTP
-src/views/              Vistas EJS
+src/services/           Reglas y servicios de negocio
+src/validators/         Validación de entradas
+src/views/              Vistas y parciales EJS
 src/public/             CSS, JavaScript e imágenes públicas
+src/utils/              Utilidades compartidas
+tests/                  Pruebas automatizadas
 ```
 
 ## Integración continua
@@ -262,7 +268,7 @@ El workflow de GitHub Actions valida cada pull request mediante:
 
 ## Estado del proyecto
 
-La infraestructura inicial, el modelo de datos, la migración, el seed y el healthcheck están preparados. Todavía no están implementados:
+La infraestructura inicial, el modelo de datos, las migraciones, el seed y el healthcheck están preparados. Todavía no están implementados:
 
 - Registro e inicio de sesión.
 - Argon2id.
