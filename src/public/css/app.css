@@ -1,0 +1,11 @@
+:root {
+  --mendo-surface: #ffffff;
+}
+
+body {
+  color: #212529;
+}
+
+main section {
+  background: linear-gradient(135deg, var(--mendo-surface), #eef4ff);
+}
