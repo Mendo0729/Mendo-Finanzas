@@ -6,11 +6,21 @@
 
     <main class="container py-5 flex-grow-1">
       <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
-        <span class="badge text-bg-primary mb-3">Entorno inicial</span>
-        <h1 class="display-5 fw-bold">Mendo Finanzas</h1>
-        <p class="lead">
-          La estructura Node.js, Express, EJS, Prisma y PostgreSQL está preparada.
-        </p>
+        <% if (currentUser) { %>
+          <span class="badge text-bg-success mb-3">Sesión autenticada</span>
+          <h1 class="display-5 fw-bold">Hola, <%= currentUser.name %></h1>
+          <p class="lead">
+            Tu cuenta está lista. Los espacios financieros se incorporarán en la siguiente fase.
+          </p>
+        <% } else { %>
+          <span class="badge text-bg-primary mb-3">Mendo Finanzas</span>
+          <h1 class="display-5 fw-bold">Organiza tus finanzas con claridad</h1>
+          <p class="lead">Crea una cuenta o inicia sesión para comenzar.</p>
+          <div class="d-flex flex-wrap gap-2 mb-4">
+            <a class="btn btn-primary" href="/auth/register">Crear cuenta</a>
+            <a class="btn btn-outline-primary" href="/auth/login">Iniciar sesión</a>
+          </div>
+        <% } %>
 
         <dl class="row mb-4">
           <dt class="col-sm-3">Aplicación</dt>
@@ -18,7 +28,9 @@
 
           <dt class="col-sm-3">Base de datos</dt>
           <dd class="col-sm-9">
-            <span class="badge <%= databaseStatus === 'up' ? 'text-bg-success' : 'text-bg-danger' %>">
+            <span
+              class="badge <%= databaseStatus === 'up' ? 'text-bg-success' : 'text-bg-danger' %>"
+            >
               <%= databaseStatus === 'up' ? 'Disponible' : 'No disponible' %>
             </span>
           </dd>
@@ -27,17 +39,7 @@
           <dd class="col-sm-9"><code><%= environment %></code></dd>
         </dl>
 
-        <div class="d-flex flex-wrap gap-2">
-          <a class="btn btn-primary" href="/health">Consultar healthcheck</a>
-          <a
-            class="btn btn-outline-secondary"
-            href="https://github.com/Mendo0729/Mendo-Finanzas"
-            target="_blank"
-            rel="noreferrer"
-          >
-            Ver repositorio
-          </a>
-        </div>
+        <a class="btn btn-outline-secondary" href="/health">Consultar healthcheck</a>
       </section>
     </main>
 
