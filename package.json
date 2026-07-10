@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
+    "postinstall": "prisma generate",
     "check": "npm run format:check && npm run lint && npm run prisma:validate",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
