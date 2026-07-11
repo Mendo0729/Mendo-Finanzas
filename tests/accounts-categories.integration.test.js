@@ -18,7 +18,10 @@ function actor(userId, householdId) {
 }
 
 async function cleanup() {
-  const users = await prisma.user.findMany({ where: { email: { in: emails } }, select: { id: true } });
+  const users = await prisma.user.findMany({
+    where: { email: { in: emails } },
+    select: { id: true },
+  });
   const ids = users.map(({ id }) => id);
   if (ids.length > 0) {
     await prisma.household.deleteMany({ where: { createdBy: { in: ids } } });
@@ -42,8 +45,12 @@ before(async () => {
   );
 
   [householdA, householdB] = await Promise.all([
-    prisma.household.create({ data: { name: `Recursos A ${suffix}`, currency: 'USD', createdBy: userA.id } }),
-    prisma.household.create({ data: { name: `Recursos B ${suffix}`, currency: 'USD', createdBy: userB.id } }),
+    prisma.household.create({
+      data: { name: `Recursos A ${suffix}`, currency: 'USD', createdBy: userA.id },
+    }),
+    prisma.household.create({
+      data: { name: `Recursos B ${suffix}`, currency: 'USD', createdBy: userB.id },
+    }),
   ]);
 
   await prisma.householdMember.createMany({
@@ -99,7 +106,10 @@ test('las cuentas se aíslan por espacio y cada mutación genera auditoría', as
     logs.map(({ action }) => action),
     [AUDIT_ACTIONS.CREATE, AUDIT_ACTIONS.DEACTIVATE],
   );
-  assert.equal(logs.every(({ userId }) => userId === userA.id), true);
+  assert.equal(
+    logs.every(({ userId }) => userId === userA.id),
+    true,
+  );
 });
 
 test('las categorías respetan conflictos, uso y auditoría', async () => {

@@ -17,11 +17,7 @@ import {
   showEditCategory,
   updateCategory,
 } from './category.controller.js';
-import {
-  categoryBodySchema,
-  categoryIdSchema,
-  categoryStatusSchema,
-} from './category.schemas.js';
+import { categoryBodySchema, categoryIdSchema, categoryStatusSchema } from './category.schemas.js';
 
 export const categoryRouter = Router();
 
