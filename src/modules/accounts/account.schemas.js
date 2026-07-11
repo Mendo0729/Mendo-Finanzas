@@ -23,10 +23,7 @@ function text(value, path, { max, required = true } = {}) {
 
 function integer(value, path, { min, max, nullable = false } = {}) {
   const normalized = typeof value === 'string' ? value.trim() : value;
-  if (
-    (normalized === '' || normalized === null || normalized === undefined) &&
-    nullable
-  ) {
+  if ((normalized === '' || normalized === null || normalized === undefined) && nullable) {
     return null;
   }
   const parsed = Number(normalized);
