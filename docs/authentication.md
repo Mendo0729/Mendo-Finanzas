@@ -8,7 +8,7 @@ Mendo Finanzas permite registrar usuarios, iniciar sesión y cerrar sesión medi
 - `GET /auth/login` y `POST /auth/login`.
 - `POST /auth/logout`.
 
-Después de un registro o login correcto, el identificador de sesión se regenera para impedir fijación de sesión. En la sesión solo se almacena `userId` y la fecha de autenticación; nunca se guarda el usuario completo ni su contraseña.
+Después de un registro o login correcto, el identificador de sesión se regenera para impedir fijación de sesión. La sesión almacena únicamente identificadores y marcas de tiempo mínimas: `userId`, `authenticatedAt` y, después de una selección válida, `householdId` y `householdSelectedAt`. Nunca se guarda el usuario, la membresía, el rol, los permisos ni la contraseña completa.
 
 ## Contraseñas
 
@@ -31,9 +31,11 @@ Configuración principal:
 
 `SESSION_SECRET` es obligatorio, debe tener al menos 32 caracteres y nunca debe almacenarse en el repositorio.
 
+El `householdId` guardado en sesión no concede acceso por sí mismo. `loadHouseholdContext` vuelve a consultar la membresía en PostgreSQL durante cada solicitud y elimina selecciones inválidas o ajenas.
+
 ## CSRF
 
-Cada formulario de autenticación recibe un token aleatorio asociado a la sesión. Los métodos que modifican estado verifican `_csrf` antes de ejecutar validaciones o trabajo criptográfico. Un token ausente o inválido devuelve HTTP 403.
+Cada formulario de autenticación y selección de espacio recibe un token aleatorio asociado a la sesión. Los métodos que modifican estado verifican `_csrf` antes de ejecutar validaciones o trabajo criptográfico. Un token ausente o inválido devuelve HTTP 403.
 
 ## Rate limiting
 

@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+    <%- include('../partials/navbar') %>
+
+    <main class="container py-5 flex-grow-1">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
+            <span class="badge text-bg-primary mb-3">Contexto financiero</span>
+            <h1 class="h2">Selecciona un espacio</h1>
+            <p class="text-body-secondary mb-4">
+              Las cuentas, categorías, movimientos y presupuestos se limitarán al espacio activo.
+            </p>
+
+            <% if (households.length === 0) { %>
+              <div class="alert alert-info mb-4" role="alert">
+                Tu cuenta todavía no tiene espacios financieros asignados.
+              </div>
+              <p class="mb-0 text-body-secondary">
+                La creación de espacios y la administración de integrantes se incorporarán en una fase posterior.
+              </p>
+            <% } else { %>
+              <form method="post" action="/households/select">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+                <div class="vstack gap-3 mb-4">
+                  <% households.forEach((household, index) => { %>
+                    <label class="border rounded-3 p-3 d-flex gap-3 align-items-start">
+                      <input
+                        class="form-check-input mt-1"
+                        type="radio"
+                        name="householdId"
+                        value="<%= household.id %>"
+                        <%= household.id === selectedHouseholdId || (!selectedHouseholdId && index === 0) ? 'checked' : '' %>
+                        required
+                      />
+                      <span class="flex-grow-1">
+                        <span class="d-flex flex-wrap align-items-center gap-2">
+                          <strong><%= household.name %></strong>
+                          <span class="badge text-bg-light"><%= household.role.label %></span>
+                          <% if (household.id === selectedHouseholdId) { %>
+                            <span class="badge text-bg-success">Activo</span>
+                          <% } %>
+                        </span>
+                        <span class="small text-body-secondary d-block mt-1">
+                          Moneda: <%= household.currency %>
+                        </span>
+                      </span>
+                    </label>
+                  <% }) %>
+                </div>
+
+                <div class="d-flex flex-wrap gap-2">
+                  <button class="btn btn-primary" type="submit">Usar este espacio</button>
+                  <a class="btn btn-outline-secondary" href="/">Volver al inicio</a>
+                </div>
+              </form>
+            <% } %>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>
