@@ -46,11 +46,4 @@ El almacenamiento actual es en memoria y corresponde al despliegue de una sola i
 
 ## Datos de desarrollo
 
-El seed prepara credenciales exclusivas para pruebas locales:
-
-```text
-Correo: demo@mendofinanzas.local
-Contraseña: MendoFinanzasDemo2026!
-```
-
-La contraseña queda almacenada como Argon2id mediante un hash fijo de desarrollo. `npm run db:seed` la restablece para que el espacio financiero y sus datos de demostración puedan validarse desde la interfaz. Estas credenciales no deben ejecutarse ni utilizarse en producción.
+El usuario `demo@mendofinanzas.local` creado por el seed conserva datos financieros de demostración, pero su contraseña histórica no es un hash válido. Para probar autenticación se debe registrar un usuario nuevo desde `/auth/register`.
