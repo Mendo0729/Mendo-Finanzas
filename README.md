@@ -104,14 +104,7 @@ npm run db:seed
 
 El seed es idempotente y crea un usuario de desarrollo, un espacio financiero, cinco cuentas, categorías, presupuestos y veinte transacciones.
 
-Credenciales exclusivas para pruebas locales:
-
-```text
-Correo: demo@mendofinanzas.local
-Contraseña: MendoFinanzasDemo2026!
-```
-
-La contraseña se almacena como Argon2id y el script de seed la restablece al valor de demostración. Estas credenciales no deben utilizarse ni cargarse en producción.
+El usuario `demo@mendofinanzas.local` conserva los datos financieros de demostración, pero su contraseña histórica no es un hash válido. Para probar autenticación registra una cuenta nueva desde la aplicación.
 
 ### 6. Iniciar la aplicación
 
