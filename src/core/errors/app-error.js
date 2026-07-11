@@ -67,3 +67,14 @@ export class ConflictError extends AppError {
     });
   }
 }
+
+export class RateLimitError extends AppError {
+  constructor(message = 'Demasiados intentos. Espera antes de volver a intentarlo.', options = {}) {
+    super(message, {
+      statusCode: 429,
+      code: 'RATE_LIMITED',
+      expose: true,
+      ...options,
+    });
+  }
+}

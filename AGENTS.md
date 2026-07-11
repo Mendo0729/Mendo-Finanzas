@@ -24,6 +24,11 @@
 - Toda consulta financiera debe limitarse por `householdId` y membresía.
 - No confiar únicamente en identificadores enviados por el navegador.
 - Propagar el `requestId` en errores y registros sin aceptar valores de cabecera inválidos.
+- Almacenar contraseñas únicamente con Argon2id.
+- Guardar en la sesión solo identificadores y datos mínimos; nunca objetos completos de usuario.
+- Regenerar la sesión después del registro o login y destruirla al cerrar sesión.
+- Proteger con CSRF toda operación web que modifique estado.
+- Aplicar rate limiting antes de ejecutar validaciones criptográficas costosas.
 
 ## Datos financieros
 
@@ -55,5 +60,6 @@
 
 ## Alcance actual
 
-- La autenticación con Argon2id, sesiones, TOTP y códigos de recuperación todavía no está implementada.
+- Registro, login, logout, Argon2id, sesiones PostgreSQL, CSRF y rate limiting están implementados.
+- TOTP, códigos de recuperación, verificación de correo y restablecimiento de contraseña aún no están implementados.
 - No comenzar módulos financieros adicionales sin una tarea específica y un alcance definido.

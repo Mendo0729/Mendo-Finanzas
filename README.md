@@ -2,34 +2,20 @@
 
 Aplicación web para administrar finanzas personales, familiares y compartidas.
 
-## Arquitectura
+## Estado actual
 
-```text
-finanzas.mendotech.lat
-        │
-        ▼
-Cloudflare — DNS, proxy y TLS
-        │
-        ▼
-Render — Node.js, Express y EJS
-        │
-        ▼
-Aiven PostgreSQL
-```
+La base técnica incluye:
 
-Durante el desarrollo se utiliza PostgreSQL 17 local mediante Docker Compose. Las migraciones Prisma serán las mismas en desarrollo y producción.
+- Node.js 22, Express 5 y EJS.
+- PostgreSQL 17 y Prisma ORM.
+- Arquitectura backend modular.
+- Registro, login y logout.
+- Contraseñas protegidas con Argon2id.
+- Sesiones persistidas en PostgreSQL.
+- Protección CSRF y rate limiting para autenticación.
+- Restricciones de integridad financiera y pruebas automatizadas.
 
-## Tecnologías iniciales
-
-- Node.js 22 o superior.
-- Express 5.
-- EJS.
-- Prisma ORM.
-- PostgreSQL 17.
-- Docker Compose.
-- Bootstrap 5.
-- ESLint y Prettier.
-- GitHub Actions.
+Todavía no están implementados TOTP, recuperación de contraseña, verificación de correo, contexto de espacios financieros ni los CRUD financieros.
 
 ## Requisitos
 
@@ -56,19 +42,25 @@ git clone https://github.com/Mendo0729/Mendo-Finanzas.git
 cd Mendo-Finanzas
 ```
 
-Para trabajar con la rama inicial mientras el pull request siga abierto:
-
-```powershell
-git switch feat/initial-project-structure
-```
-
 ### 2. Crear las variables locales
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Cambia `POSTGRES_PASSWORD` y actualiza la misma contraseña dentro de `DATABASE_URL`. El archivo `.env` es local y nunca debe subirse al repositorio.
+Modifica en `.env`:
+
+- `POSTGRES_PASSWORD`.
+- La contraseña incluida en `DATABASE_URL`.
+- `SESSION_SECRET` con un valor aleatorio de al menos 32 caracteres.
+
+El archivo `.env` es local y nunca debe subirse al repositorio.
+
+Para generar un secreto desde PowerShell:
+
+```powershell
+[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
+```
 
 ### 3. Instalar dependencias
 
@@ -103,32 +95,11 @@ npm run prisma:deploy
 npm run db:seed
 ```
 
-El seed es seguro de ejecutar varias veces y crea:
+El seed es idempotente y crea un usuario de desarrollo, un espacio financiero, cinco cuentas, categorías, presupuestos y veinte transacciones.
 
-- Un usuario de desarrollo.
-- Un espacio financiero.
-- Cinco cuentas.
-- Categorías iniciales.
-- Presupuestos del mes actual.
-- Veinte transacciones de ejemplo.
+El usuario `demo@mendofinanzas.local` conserva los datos financieros de demostración, pero su contraseña histórica no es un hash válido. Para probar registro y login crea una cuenta nueva desde la aplicación.
 
-El valor de contraseña incluido en el seed no es un hash válido y no permite autenticarse. La autenticación se implementará posteriormente con Argon2id.
-
-### 6. Validar el proyecto
-
-```powershell
-npm run check
-```
-
-También puedes ejecutar las validaciones individualmente:
-
-```powershell
-npm run format:check
-npm run lint
-npm run prisma:validate
-```
-
-### 7. Iniciar la aplicación
+### 6. Iniciar la aplicación
 
 ```powershell
 npm run dev
@@ -146,138 +117,126 @@ Healthcheck:
 http://localhost:3000/health
 ```
 
-El healthcheck devuelve HTTP `200` cuando PostgreSQL está disponible y HTTP `503` cuando la conexión falla.
+## Autenticación
 
-## Prisma Studio
-
-```powershell
-npm run prisma:studio
-```
-
-Prisma Studio se abre normalmente en:
+Rutas disponibles:
 
 ```text
-http://localhost:5555
+GET  /auth/register
+POST /auth/register
+GET  /auth/login
+POST /auth/login
+POST /auth/logout
 ```
 
-## Cambios futuros al esquema
+Características principales:
 
-Después de modificar `prisma/schema.prisma`, crea una migración de desarrollo con un nombre descriptivo:
+- Hash Argon2id con parámetros controlados.
+- Contraseñas de 12 a 128 caracteres.
+- Mensaje genérico para credenciales incorrectas.
+- Regeneración del identificador de sesión después de registro y login.
+- Cookie `mendo.sid` con `HttpOnly`, `SameSite=Lax` y `Secure` en producción.
+- Sesiones guardadas en la tabla PostgreSQL `sessions`.
+- Tokens CSRF en formularios que modifican estado.
+- Límites de intentos para registro y login.
+
+Consulta [docs/authentication.md](docs/authentication.md) para ver las decisiones de seguridad y las limitaciones actuales.
+
+## Validación
+
+Ejecuta todas las comprobaciones:
 
 ```powershell
-npm run prisma:migrate -- --name nombre_del_cambio
+npm run check
+npm test
 ```
 
-Revisa el SQL generado dentro de `prisma/migrations` antes de confirmarlo en Git.
-
-En producción se utilizará únicamente:
+Comandos individuales:
 
 ```powershell
-npm run prisma:deploy
+npm run format:check
+npm run lint
+npm run prisma:validate
+npm run test:unit
+npm run test:db
+npm run test:http
 ```
 
-No se ejecutará `prisma migrate dev` en Render.
+Las pruebas HTTP cubren registro, CSRF, Argon2id, persistencia de sesiones, logout, credenciales incorrectas y regeneración de sesión.
+
+## Estructura principal
+
+```text
+.github/workflows/       Integración continua
+prisma/                  Esquema, migraciones y seed
+src/bootstrap/           Registro de middlewares y rutas
+src/config/              Entorno, Prisma y sesiones
+src/core/                Seguridad, errores, middlewares y utilidades
+src/modules/             Módulos funcionales del backend
+src/views/               Vistas y parciales EJS
+src/public/              CSS, JavaScript e imágenes públicas
+tests/unit/              Pruebas unitarias
+tests/http/              Pruebas HTTP
+tests/                   Pruebas de integración de base de datos
+docs/                    Decisiones técnicas
+```
+
+El flujo esperado dentro de un módulo es:
+
+```text
+routes -> controller -> service -> repository -> Prisma
+```
+
+Consulta [docs/backend-architecture.md](docs/backend-architecture.md) antes de crear un módulo nuevo.
 
 ## Administración de PostgreSQL local
 
-### Ver logs
+Ver logs:
 
 ```powershell
 npm run db:logs
 ```
 
-### Detener sin borrar datos
+Detener sin borrar datos:
 
 ```powershell
 npm run db:down
 ```
 
-### Volver a iniciar
-
-```powershell
-npm run db:up
-```
-
-### Eliminar la base local
+Eliminar el contenedor y el volumen:
 
 ```powershell
 npm run db:reset
 ```
 
-> `db:reset` elimina el contenedor y el volumen persistente. Todos los datos locales se perderán. Después tendrás que iniciar PostgreSQL y aplicar nuevamente las migraciones y el seed.
+> `db:reset` elimina todos los datos locales. Después debes iniciar PostgreSQL, aplicar migraciones y ejecutar nuevamente el seed.
 
-## Modelo de datos aprobado
+## Migraciones
 
-El esquema inicial contiene:
+Después de modificar `prisma/schema.prisma`, crea una migración de desarrollo:
 
-- `users`.
-- `user_mfa`.
-- `recovery_codes`.
-- `households`.
-- `household_members`.
-- `accounts`.
-- `categories`.
-- `transactions`.
-- `budgets`.
-- `auth_tokens`.
-- `sessions`.
-- `audit_logs`.
+```powershell
+npm run prisma:migrate -- --name nombre_del_cambio
+```
 
-Decisiones principales:
+Revisa el SQL generado antes de confirmarlo. En CI y producción se utiliza únicamente:
 
-- Identificadores internos `BIGINT`.
-- Dinero con `DECIMAL(14,2)`, nunca `FLOAT`.
-- Saldo calculado desde el saldo inicial y las transacciones.
-- Transferencias representadas por dos movimientos enlazados mediante `transfer_group_id`.
-- Eliminación lógica de transacciones con `deleted_at`.
-- Datos financieros aislados mediante `household_id`.
-- Secretos TOTP cifrados antes de almacenarse.
-- Códigos de recuperación almacenados como hash.
-- Archivos, recibos e imágenes fuera de PostgreSQL.
-- Categorías referenciadas por movimientos protegidas contra eliminación física.
-
-La migración inicial incluye restricciones `CHECK` para roles, tipos de cuenta, categorías, estados, montos positivos, días válidos y consistencia de transferencias.
-
-## Estructura principal
-
-```text
-.github/workflows/      Integración continua
-prisma/                 Esquema, migraciones y seed
-src/config/             Entorno y conexión a la base
-src/controllers/        Controladores HTTP
-src/middleware/         Manejo transversal de solicitudes
-src/routes/             Rutas HTTP
-src/services/           Reglas y servicios de negocio
-src/validators/         Validación de entradas
-src/views/              Vistas y parciales EJS
-src/public/             CSS, JavaScript e imágenes públicas
-src/utils/              Utilidades compartidas
-tests/                  Pruebas automatizadas
+```powershell
+npm run prisma:deploy
 ```
 
 ## Integración continua
 
-El workflow de GitHub Actions valida cada pull request mediante:
+GitHub Actions ejecuta:
 
-1. Instalación exacta desde `package-lock.json`.
+1. `npm ci` desde el lockfile.
 2. Generación y validación de Prisma Client.
-3. Aplicación de migraciones en PostgreSQL 17.
-4. Ejecución del seed.
-5. Validación de formato y ESLint.
-6. Prueba de `/` y `/health` con la aplicación iniciada.
+3. Migraciones sobre PostgreSQL 17.
+4. Seed ejecutado dos veces para validar idempotencia.
+5. Prettier y ESLint.
+6. Pruebas unitarias.
+7. Pruebas de integración de base de datos.
+8. Pruebas HTTP.
+9. Smoke tests de `/`, `/health` y `/auth/login`.
 
-## Estado del proyecto
-
-La infraestructura inicial, el modelo de datos, las migraciones, el seed y el healthcheck están preparados. Todavía no están implementados:
-
-- Registro e inicio de sesión.
-- Argon2id.
-- TOTP funcional.
-- Códigos de recuperación funcionales.
-- Sesiones de usuario.
-- CRUD de cuentas y movimientos.
-- Dashboard financiero.
-- Despliegue en Render.
-- Conexión con Aiven.
-
-Estas funciones se incorporarán por etapas en ramas y pull requests independientes.
+Los workflows mantienen permisos de contenido en modo de solo lectura.
