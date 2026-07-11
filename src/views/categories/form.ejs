@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+    <%- include('../partials/navbar') %>
+    <main class="container py-5 flex-grow-1">
+      <div class="row justify-content-center">
+        <div class="col-lg-7">
+          <section class="bg-white rounded-4 shadow-sm p-4 p-md-5">
+            <h1 class="h2 mb-4"><%= pageTitle %></h1>
+            <% if (category?.isDefault) { %>
+              <div class="alert alert-info">Esta es una categoría predeterminada. Puedes cambiar su nombre o icono, pero no su tipo ni desactivarla.</div>
+            <% } %>
+            <form method="post" action="<%= action %>" class="row g-3">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div class="col-md-7">
+                <label class="form-label" for="name">Nombre</label>
+                <input class="form-control" id="name" name="name" maxlength="60" required value="<%= values.name %>" />
+              </div>
+              <div class="col-md-5">
+                <label class="form-label" for="categoryType">Tipo</label>
+                <select class="form-select" id="categoryType" name="categoryType" required <%= category?.isDefault ? 'disabled' : '' %>>
+                  <% categoryTypes.forEach((type) => { %>
+                    <option value="<%= type.value %>" <%= Number(values.categoryType) === type.value ? 'selected' : '' %>><%= type.label %></option>
+                  <% }) %>
+                </select>
+                <% if (category?.isDefault) { %><input type="hidden" name="categoryType" value="<%= values.categoryType %>" /><% } %>
+              </div>
+              <div class="col-12">
+                <label class="form-label" for="icon">Icono</label>
+                <input class="form-control" id="icon" name="icon" maxlength="40" value="<%= values.icon %>" placeholder="Ejemplo: home, car, briefcase" />
+              </div>
+              <div class="col-12 d-flex gap-2 mt-4">
+                <button class="btn btn-primary" type="submit">Guardar</button>
+                <a class="btn btn-outline-secondary" href="/categories">Cancelar</a>
+              </div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </main>
+    <%- include('../partials/footer') %>
+  </body>
+</html>
