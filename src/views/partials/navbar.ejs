@@ -5,6 +5,12 @@
     <div class="ms-auto d-flex flex-wrap justify-content-end align-items-center gap-2">
       <% if (currentUser) { %>
         <% if (currentHousehold) { %>
+          <% if (householdPermissions.includes('accounts:view')) { %>
+            <a class="btn btn-outline-primary btn-sm" href="/accounts">Cuentas</a>
+          <% } %>
+          <% if (householdPermissions.includes('categories:view')) { %>
+            <a class="btn btn-outline-primary btn-sm" href="/categories">Categorías</a>
+          <% } %>
           <a class="btn btn-light btn-sm" href="/households/select">
             <span class="d-none d-md-inline">Espacio:</span>
             <strong><%= currentHousehold.name %></strong>
