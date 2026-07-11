@@ -215,10 +215,11 @@ test('el espacio autorizado persiste y una sesión manipulada se invalida', asyn
   assert.doesNotMatch(activeHtml, new RegExp(outsiderHousehold.name));
 
   const sessionRecord = (await prisma.session.findMany()).find(
-    ({ sess }) => sess.userId === memberUser.id.toString(),
+    ({ sess }) =>
+      sess.userId === memberUser.id.toString() &&
+      sess.householdId === memberHousehold.id.toString(),
   );
   assert.ok(sessionRecord);
-  assert.equal(sessionRecord.sess.householdId, memberHousehold.id.toString());
 
   await prisma.session.update({
     where: { sid: sessionRecord.sid },
