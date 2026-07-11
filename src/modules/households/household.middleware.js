@@ -1,4 +1,5 @@
 import { AuthorizationError, ConflictError } from '../../core/errors/app-error.js';
+import { saveSession } from '../../core/utils/session.js';
 import * as householdService from './household.service.js';
 import { roleHasPermission } from './household.roles.js';
 
@@ -47,6 +48,7 @@ export async function loadHouseholdContext(request, response, next) {
 
     if (!context) {
       clearHouseholdSelection(request);
+      await saveSession(request);
       next();
       return;
     }
