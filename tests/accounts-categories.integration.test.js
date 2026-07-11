@@ -23,9 +23,16 @@ async function cleanup() {
     select: { id: true },
   });
   const ids = users.map(({ id }) => id);
-  if (ids.length > 0) {
+  if (ids.length === 0) {
+    return;
+  }
+
+  await prisma.$executeRawUnsafe('ALTER TABLE "transactions" DISABLE TRIGGER USER');
+  try {
     await prisma.household.deleteMany({ where: { createdBy: { in: ids } } });
     await prisma.user.deleteMany({ where: { id: { in: ids } } });
+  } finally {
+    await prisma.$executeRawUnsafe('ALTER TABLE "transactions" ENABLE TRIGGER USER');
   }
 }
 
