@@ -1,3 +1,5 @@
+const MAX_DATABASE_ID = 9_223_372_036_854_775_807n;
+
 function createSchemaError(path, message) {
   const error = new Error(message);
   error.issues = [{ path: [path], message }];
@@ -13,7 +15,7 @@ export const householdSelectionSchema = Object.freeze({
     }
 
     const householdId = BigInt(rawHouseholdId.trim());
-    if (householdId <= 0n) {
+    if (householdId <= 0n || householdId > MAX_DATABASE_ID) {
       throw createSchemaError('householdId', 'Selecciona un espacio financiero válido.');
     }
 
