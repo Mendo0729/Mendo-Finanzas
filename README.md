@@ -13,9 +13,12 @@ La base técnica incluye:
 - Contraseñas protegidas con Argon2id.
 - Sesiones persistidas en PostgreSQL.
 - Protección CSRF y rate limiting para autenticación.
+- Selección de espacio financiero y contexto de membresía.
+- Roles `OWNER`, `ADMIN`, `EDITOR` y `VIEWER`.
+- Matriz central de permisos y aislamiento por `householdId`.
 - Restricciones de integridad financiera y pruebas automatizadas.
 
-Todavía no están implementados TOTP, recuperación de contraseña, verificación de correo, contexto de espacios financieros ni los CRUD financieros.
+Todavía no están implementados TOTP, recuperación de contraseña, verificación de correo, creación de espacios, administración de integrantes ni los CRUD financieros.
 
 ## Requisitos
 
@@ -56,10 +59,14 @@ Modifica en `.env`:
 
 El archivo `.env` es local y nunca debe subirse al repositorio.
 
-Para generar un secreto desde PowerShell:
+Para generar un secreto compatible con Windows PowerShell:
 
 ```powershell
-[Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(48))
+$bytes = New-Object byte[] 48
+$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+$rng.GetBytes($bytes)
+$rng.Dispose()
+[Convert]::ToBase64String($bytes)
 ```
 
 ### 3. Instalar dependencias
@@ -142,6 +149,36 @@ Características principales:
 
 Consulta [docs/authentication.md](docs/authentication.md) para ver las decisiones de seguridad y las limitaciones actuales.
 
+## Espacios financieros y autorización
+
+Rutas disponibles:
+
+```text
+GET  /households/select
+POST /households/select
+GET  /households/current
+```
+
+El espacio activo se guarda como `householdId` dentro de la sesión. La aplicación vuelve a consultar `household_members` en cada solicitud, por lo que un espacio manipulado, eliminado o del cual el usuario ya no sea miembro se descarta automáticamente.
+
+Roles disponibles:
+
+| Código | Rol | Descripción |
+|---:|---|---|
+| 1 | `OWNER` | Control total del espacio. |
+| 2 | `ADMIN` | Administración sin eliminación ni transferencia de propiedad. |
+| 3 | `EDITOR` | Consulta y modificación de datos financieros. |
+| 4 | `VIEWER` | Consulta sin modificación. |
+
+Los próximos módulos financieros deben usar:
+
+- `requireHouseholdMembership`.
+- `requireHouseholdPermission(...)`.
+- `requireHouseholdRole(...)` para reglas estrictamente vinculadas al rol.
+- `requireHouseholdScope(...)` cuando una ruta reciba un `householdId`.
+
+Consulta [docs/household-authorization.md](docs/household-authorization.md) para ver la matriz completa y las reglas de aislamiento.
+
 ## Validación
 
 Ejecuta todas las comprobaciones:
@@ -162,7 +199,7 @@ npm run test:db
 npm run test:http
 ```
 
-Las pruebas HTTP cubren registro, CSRF, Argon2id, persistencia de sesiones, logout, credenciales incorrectas y regeneración de sesión.
+Las pruebas cubren autenticación, CSRF, Argon2id, sesiones PostgreSQL, selección de espacios, permisos por rol y rechazo de accesos entre espacios.
 
 ## Estructura principal
 
