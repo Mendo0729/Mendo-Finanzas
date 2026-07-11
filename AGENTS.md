@@ -29,6 +29,20 @@
 - Regenerar la sesión después del registro o login y destruirla al cerrar sesión.
 - Proteger con CSRF toda operación web que modifique estado.
 - Aplicar rate limiting antes de ejecutar validaciones criptográficas costosas.
+- Revalidar el espacio seleccionado contra `household_members` en cada solicitud.
+- Usar `HOUSEHOLD_ROLES` y `HOUSEHOLD_PERMISSIONS`; no comparar números de rol dispersos en el código.
+- Preferir permisos sobre comparaciones de rol para proteger funcionalidades normales.
+- No revelar si un recurso perteneciente a otro espacio existe.
+
+## Contexto financiero
+
+- Obtener el espacio activo desde `request.context.household`, nunca directamente desde el cuerpo o los parámetros.
+- Exigir `requireHouseholdMembership` antes de acceder a datos financieros.
+- Aplicar `requireHouseholdPermission` o `requireHouseholdRole` según la acción.
+- Toda consulta de recurso debe filtrar simultáneamente por su identificador y `householdId`.
+- Usar `requireHouseholdScope` cuando una ruta reciba explícitamente un `householdId`.
+- No almacenar roles o permisos en la sesión como fuente de verdad.
+- Consultar `docs/household-authorization.md` antes de crear rutas financieras.
 
 ## Datos financieros
 
@@ -55,11 +69,14 @@
 - Ejecutar las pruebas unitarias, de integración o HTTP relevantes para el cambio.
 - Mantener actualizado `package-lock.json` cuando cambien dependencias.
 - Agregar pruebas para nuevas reglas de negocio y controles de autorización.
+- Agregar pruebas de aislamiento entre espacios para cada módulo financiero.
 - No simular validaciones que no pudieron ejecutarse.
 - Mantener el workflow de CI en modo de solo lectura.
 
 ## Alcance actual
 
 - Registro, login, logout, Argon2id, sesiones PostgreSQL, CSRF y rate limiting están implementados.
+- Selección de espacio, contexto de membresía, roles y matriz de permisos están implementados.
 - TOTP, códigos de recuperación, verificación de correo y restablecimiento de contraseña aún no están implementados.
+- La creación de espacios y la administración de integrantes todavía no están implementadas.
 - No comenzar módulos financieros adicionales sin una tarea específica y un alcance definido.
