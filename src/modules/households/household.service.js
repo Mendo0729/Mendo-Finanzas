@@ -6,10 +6,12 @@ import {
   getPermissionsForRole,
 } from './household.roles.js';
 
+const MAX_DATABASE_ID = 9_223_372_036_854_775_807n;
+
 function parseHouseholdId(value) {
   try {
     const householdId = BigInt(value);
-    return householdId > 0n ? householdId : null;
+    return householdId > 0n && householdId <= MAX_DATABASE_ID ? householdId : null;
   } catch {
     return null;
   }
