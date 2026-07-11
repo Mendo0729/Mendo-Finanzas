@@ -33,7 +33,7 @@
     "db:reset": "docker compose down -v"
   },
   "prisma": {
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js && node prisma/set-demo-password.js"
   },
   "dependencies": {
     "@prisma/client": "6.19.3",
