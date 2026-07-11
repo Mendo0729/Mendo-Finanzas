@@ -1,4 +1,0 @@
-
-> mendo-finanzas@0.1.0 lint
-> eslint .
-
