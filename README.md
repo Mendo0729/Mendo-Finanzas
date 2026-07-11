@@ -163,12 +163,12 @@ El espacio activo se guarda como `householdId` dentro de la sesión. La aplicaci
 
 Roles disponibles:
 
-| Código | Rol | Descripción |
-|---:|---|---|
-| 1 | `OWNER` | Control total del espacio. |
-| 2 | `ADMIN` | Administración sin eliminación ni transferencia de propiedad. |
-| 3 | `EDITOR` | Consulta y modificación de datos financieros. |
-| 4 | `VIEWER` | Consulta sin modificación. |
+| Código | Rol      | Descripción                                                   |
+| -----: | -------- | ------------------------------------------------------------- |
+|      1 | `OWNER`  | Control total del espacio.                                    |
+|      2 | `ADMIN`  | Administración sin eliminación ni transferencia de propiedad. |
+|      3 | `EDITOR` | Consulta y modificación de datos financieros.                 |
+|      4 | `VIEWER` | Consulta sin modificación.                                    |
 
 Los próximos módulos financieros deben usar:
 

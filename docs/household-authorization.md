@@ -15,28 +15,28 @@ El contexto activo se obtiene mediante esta secuencia:
 
 ## Roles
 
-| Código | Rol | Alcance |
-|---:|---|---|
-| 1 | `OWNER` | Control total, incluida eliminación y transferencia de propiedad. |
-| 2 | `ADMIN` | Administración del espacio, integrantes y datos financieros, sin eliminar ni transferir la propiedad. |
-| 3 | `EDITOR` | Consulta y modificación de cuentas, categorías, movimientos y presupuestos. |
-| 4 | `VIEWER` | Consulta de información sin permisos de modificación. |
+| Código | Rol      | Alcance                                                                                               |
+| -----: | -------- | ----------------------------------------------------------------------------------------------------- |
+|      1 | `OWNER`  | Control total, incluida eliminación y transferencia de propiedad.                                     |
+|      2 | `ADMIN`  | Administración del espacio, integrantes y datos financieros, sin eliminar ni transferir la propiedad. |
+|      3 | `EDITOR` | Consulta y modificación de cuentas, categorías, movimientos y presupuestos.                           |
+|      4 | `VIEWER` | Consulta de información sin permisos de modificación.                                                 |
 
 La fuente de verdad está en `src/modules/households/household.roles.js`.
 
 ## Matriz resumida
 
-| Capacidad | Owner | Admin | Editor | Viewer |
-|---|:---:|:---:|:---:|:---:|
-| Ver espacio | Sí | Sí | Sí | Sí |
-| Editar espacio | Sí | Sí | No | No |
-| Eliminar espacio | Sí | No | No | No |
-| Transferir propiedad | Sí | No | No | No |
-| Ver integrantes | Sí | Sí | Sí | Sí |
-| Administrar integrantes | Sí | Sí | No | No |
-| Ver datos financieros | Sí | Sí | Sí | Sí |
-| Modificar datos financieros | Sí | Sí | Sí | No |
-| Consultar auditoría | Sí | Sí | No | No |
+| Capacidad                   | Owner | Admin | Editor | Viewer |
+| --------------------------- | :---: | :---: | :----: | :----: |
+| Ver espacio                 |  Sí   |  Sí   |   Sí   |   Sí   |
+| Editar espacio              |  Sí   |  Sí   |   No   |   No   |
+| Eliminar espacio            |  Sí   |  No   |   No   |   No   |
+| Transferir propiedad        |  Sí   |  No   |   No   |   No   |
+| Ver integrantes             |  Sí   |  Sí   |   Sí   |   Sí   |
+| Administrar integrantes     |  Sí   |  Sí   |   No   |   No   |
+| Ver datos financieros       |  Sí   |  Sí   |   Sí   |   Sí   |
+| Modificar datos financieros |  Sí   |  Sí   |   Sí   |   No   |
+| Consultar auditoría         |  Sí   |  Sí   |   No   |   No   |
 
 ## Middlewares disponibles
 

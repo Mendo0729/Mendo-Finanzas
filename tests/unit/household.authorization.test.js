@@ -83,10 +83,9 @@ test('el middleware de permisos autoriza por rol y rechaza capacidades ausentes'
   assert.ok(denied.nextError instanceof AuthorizationError);
   assert.equal(denied.nextError.code, 'HOUSEHOLD_PERMISSION_DENIED');
 
-  const missingContext = invoke(
-    requireHouseholdPermission(HOUSEHOLD_PERMISSIONS.ACCOUNTS_VIEW),
-    { context: {} },
-  );
+  const missingContext = invoke(requireHouseholdPermission(HOUSEHOLD_PERMISSIONS.ACCOUNTS_VIEW), {
+    context: {},
+  });
   assert.ok(missingContext.nextError instanceof ConflictError);
   assert.equal(missingContext.nextError.code, 'HOUSEHOLD_REQUIRED');
 });
