@@ -82,7 +82,6 @@ export class PrismaSessionStore extends session.Store {
       .updateMany({
         where: { sid: sessionId },
         data: {
-          sess: serializeSession(sessionData),
           expire: resolveExpiration(sessionData, this.ttlMs),
         },
       })
