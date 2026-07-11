@@ -14,7 +14,7 @@
     "check": "npm run format:check && npm run lint && npm run prisma:validate",
     "test": "npm run test:unit && npm run test:db && npm run test:http",
     "test:unit": "node --test tests/unit/validate.middleware.test.js tests/unit/password.security.test.js tests/unit/rate-limit.middleware.test.js tests/unit/household.authorization.test.js",
-    "test:db": "node --test --test-concurrency=1 tests/database.integration.test.js",
+    "test:db": "node --test --test-concurrency=1 tests/database.integration.test.js tests/demo-seed.integration.test.js",
     "test:http": "node --test --test-concurrency=1 tests/http/application.http.test.js tests/http/authentication.http.test.js tests/http/household-context.http.test.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
