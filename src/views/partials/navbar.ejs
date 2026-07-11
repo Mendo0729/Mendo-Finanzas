@@ -2,9 +2,18 @@
   <div class="container">
     <a class="navbar-brand fw-semibold" href="/">Mendo Finanzas</a>
 
-    <div class="ms-auto d-flex align-items-center gap-2">
+    <div class="ms-auto d-flex flex-wrap justify-content-end align-items-center gap-2">
       <% if (currentUser) { %>
-        <span class="small text-body-secondary d-none d-sm-inline">
+        <% if (currentHousehold) { %>
+          <a class="btn btn-light btn-sm" href="/households/select">
+            <span class="d-none d-md-inline">Espacio:</span>
+            <strong><%= currentHousehold.name %></strong>
+          </a>
+        <% } else { %>
+          <a class="btn btn-warning btn-sm" href="/households/select">Seleccionar espacio</a>
+        <% } %>
+
+        <span class="small text-body-secondary d-none d-lg-inline">
           Sesión activa como <strong><%= currentUser.name %></strong>
         </span>
         <form method="post" action="/auth/logout" class="m-0">
