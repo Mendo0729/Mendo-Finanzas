@@ -2,7 +2,6 @@ import { buildAuditActor } from '../../core/audit/audit.constants.js';
 import { saveSession } from '../../core/utils/session.js';
 import { DEFAULT_HOUSEHOLD_CURRENCY, HOUSEHOLD_CURRENCY_OPTIONS } from './household.constants.js';
 import * as householdService from './household.service.js';
-import { getPermissionEntriesForRole } from './household.roles.js';
 
 function formValues(household = null) {
   return {
@@ -97,6 +96,5 @@ export function showCurrentHousehold(request, response) {
     },
     role: householdRole,
     joinedAt: membership.joinedAt,
-    permissions: getPermissionEntriesForRole(membership.role),
   });
 }
