@@ -93,20 +93,22 @@ before(async () => {
     }),
   ]);
 
-  [expenseCategoryA, secondExpenseCategoryA, incomeCategoryA, expenseCategoryB] = await Promise.all([
-    prisma.category.create({
-      data: { householdId: householdA.id, name: `Alimentos ${suffix}`, categoryType: 2 },
-    }),
-    prisma.category.create({
-      data: { householdId: householdA.id, name: `Transporte ${suffix}`, categoryType: 2 },
-    }),
-    prisma.category.create({
-      data: { householdId: householdA.id, name: `Salario ${suffix}`, categoryType: 1 },
-    }),
-    prisma.category.create({
-      data: { householdId: householdB.id, name: `Externo ${suffix}`, categoryType: 2 },
-    }),
-  ]);
+  [expenseCategoryA, secondExpenseCategoryA, incomeCategoryA, expenseCategoryB] = await Promise.all(
+    [
+      prisma.category.create({
+        data: { householdId: householdA.id, name: `Alimentos ${suffix}`, categoryType: 2 },
+      }),
+      prisma.category.create({
+        data: { householdId: householdA.id, name: `Transporte ${suffix}`, categoryType: 2 },
+      }),
+      prisma.category.create({
+        data: { householdId: householdA.id, name: `Salario ${suffix}`, categoryType: 1 },
+      }),
+      prisma.category.create({
+        data: { householdId: householdB.id, name: `Externo ${suffix}`, categoryType: 2 },
+      }),
+    ],
+  );
 });
 
 after(async () => {
