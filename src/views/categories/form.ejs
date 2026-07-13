@@ -1,44 +1,109 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
-    <%- include('../partials/navbar') %>
-    <main class="container py-5 flex-grow-1">
-      <div class="row justify-content-center">
-        <div class="col-lg-7">
-          <section class="bg-white rounded-4 shadow-sm p-4 p-md-5">
-            <h1 class="h2 mb-4"><%= pageTitle %></h1>
-            <% if (category?.isDefault) { %>
-              <div class="alert alert-info">Esta es una categoría predeterminada. Puedes cambiar su nombre o icono, pero no su tipo ni desactivarla.</div>
-            <% } %>
-            <form method="post" action="<%= action %>" class="row g-3">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-              <div class="col-md-7">
-                <label class="form-label" for="name">Nombre</label>
-                <input class="form-control" id="name" name="name" maxlength="60" required value="<%= values.name %>" />
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'categories' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
+
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Categorías',
+          headerTitle: pageTitle,
+          primaryAction: null,
+        }) %>
+
+        <div class="mf-workspace-content">
+          <div class="mf-form-shell">
+            <section class="mf-form-panel">
+              <div class="mf-form-panel__header">
+                <span class="mf-page-kicker">Clasificación financiera</span>
+                <h2><%= pageTitle %></h2>
+                <p>Organiza tus movimientos con un nombre, tipo e icono fáciles de reconocer.</p>
               </div>
-              <div class="col-md-5">
-                <label class="form-label" for="categoryType">Tipo</label>
-                <select class="form-select" id="categoryType" name="categoryType" required <%= category?.isDefault ? 'disabled' : '' %>>
-                  <% categoryTypes.forEach((type) => { %>
-                    <option value="<%= type.value %>" <%= Number(values.categoryType) === type.value ? 'selected' : '' %>><%= type.label %></option>
-                  <% }) %>
-                </select>
-                <% if (category?.isDefault) { %><input type="hidden" name="categoryType" value="<%= values.categoryType %>" /><% } %>
-              </div>
-              <div class="col-12">
-                <label class="form-label" for="icon">Icono</label>
-                <input class="form-control" id="icon" name="icon" maxlength="40" value="<%= values.icon %>" placeholder="Ejemplo: home, car, briefcase" />
-              </div>
-              <div class="col-12 d-flex gap-2 mt-4">
-                <button class="btn btn-primary" type="submit">Guardar</button>
-                <a class="btn btn-outline-secondary" href="/categories">Cancelar</a>
-              </div>
-            </form>
-          </section>
+
+              <% if (category?.isDefault) { %>
+                <div class="mf-inline-note mb-4">
+                  Esta categoría es predeterminada. Puedes cambiar su nombre o icono, pero no su
+                  tipo ni desactivarla.
+                </div>
+              <% } %>
+
+              <form method="post" action="<%= action %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+                <div class="mf-form-grid">
+                  <div class="mf-form-field mf-form-field--7">
+                    <label for="name">Nombre</label>
+                    <input
+                      class="mf-input"
+                      id="name"
+                      name="name"
+                      maxlength="60"
+                      required
+                      value="<%= values.name %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--5">
+                    <label for="categoryType">Tipo</label>
+                    <select
+                      class="mf-select"
+                      id="categoryType"
+                      name="categoryType"
+                      required
+                      <%= category?.isDefault ? 'disabled' : '' %>
+                    >
+                      <% categoryTypes.forEach((type) => { %>
+                        <option
+                          value="<%= type.value %>"
+                          <%= Number(values.categoryType) === type.value ? 'selected' : '' %>
+                        >
+                          <%= type.label %>
+                        </option>
+                      <% }) %>
+                    </select>
+                    <% if (category?.isDefault) { %>
+                      <input
+                        type="hidden"
+                        name="categoryType"
+                        value="<%= values.categoryType %>"
+                      />
+                    <% } %>
+                  </div>
+
+                  <div class="mf-form-field">
+                    <label for="icon">Icono</label>
+                    <input
+                      class="mf-input"
+                      id="icon"
+                      name="icon"
+                      maxlength="40"
+                      value="<%= values.icon %>"
+                      placeholder="Ejemplo: home, car, briefcase"
+                    />
+                    <p class="mf-field-help">
+                      Usa un nombre corto que represente visualmente la categoría.
+                    </p>
+                  </div>
+                </div>
+
+                <div class="mf-form-actions">
+                  <button class="mf-button mf-button--primary" type="submit">
+                    Guardar categoría
+                  </button>
+                  <a class="mf-button mf-button--ghost" href="/categories">Cancelar</a>
+                </div>
+              </form>
+            </section>
+          </div>
         </div>
-      </div>
-    </main>
-    <%- include('../partials/footer') %>
+      </main>
+    </div>
   </body>
 </html>
