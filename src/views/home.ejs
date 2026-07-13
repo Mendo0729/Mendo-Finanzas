@@ -1,70 +1,23 @@
 <!doctype html>
 <html lang="es">
   <%- include('partials/head') %>
-  <body class="<%= currentUser && currentHousehold ? 'dashboard-body' : 'bg-body-tertiary min-vh-100 d-flex flex-column' %>">
-    <% if (currentUser && currentHousehold && dashboard) { %>
+  <% if (currentUser && currentHousehold && dashboard) { %>
+    <body class="dashboard-body">
       <div class="dashboard-shell">
-        <aside class="mf-sidebar" id="dashboardSidebar" aria-label="Navegación del panel">
-          <div class="mf-sidebar__brand">
-            <span class="mf-brand-mark" aria-hidden="true">M</span>
-            <div>
-              <strong>Mendo</strong>
-              <span>Finanzas</span>
-            </div>
-          </div>
-
-          <nav class="mf-sidebar__nav">
-            <a class="mf-nav-link is-active" href="/" aria-current="page">
-              <span aria-hidden="true">⌂</span> Dashboard
-            </a>
-            <span class="mf-nav-label">Administración</span>
-            <% if (householdPermissions.includes('accounts:view')) { %>
-              <a class="mf-nav-link" href="/accounts"><span aria-hidden="true">▣</span> Cuentas</a>
-            <% } %>
-            <% if (householdPermissions.includes('categories:view')) { %>
-              <a class="mf-nav-link" href="/categories"><span aria-hidden="true">◇</span> Categorías</a>
-            <% } %>
-            <a class="mf-nav-link" href="/households/current"><span aria-hidden="true">⌂</span> Espacio financiero</a>
-            <a class="mf-nav-link" href="/security"><span aria-hidden="true">◉</span> Seguridad</a>
-          </nav>
-
-          <div class="mf-sidebar__profile">
-            <div class="mf-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
-            <div class="mf-profile-copy">
-              <strong><%= currentUser.name %></strong>
-              <span><%= currentHouseholdRole.label %></span>
-            </div>
-            <form method="post" action="/auth/logout">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-              <button class="mf-icon-button mf-icon-button--sidebar" type="submit" aria-label="Cerrar sesión">↪</button>
-            </form>
-          </div>
-        </aside>
-
-        <button class="mf-sidebar-backdrop" type="button" data-sidebar-close aria-label="Cerrar menú"></button>
+        <%- include('partials/app-sidebar', { activeSection: 'dashboard' }) %>
+        <button
+          class="mf-sidebar-backdrop"
+          type="button"
+          data-sidebar-close
+          aria-label="Cerrar menú"
+        ></button>
 
         <main class="mf-dashboard-main">
-          <header class="mf-topbar">
-            <div class="mf-topbar__title">
-              <button class="mf-menu-button" type="button" data-sidebar-toggle aria-controls="dashboardSidebar" aria-expanded="false">
-                <span></span><span></span><span></span>
-                <span class="visually-hidden">Abrir menú</span>
-              </button>
-              <div>
-                <p>Panel financiero</p>
-                <h1>Hola, <%= currentUser.name.split(' ')[0] %></h1>
-              </div>
-            </div>
-            <div class="mf-topbar__actions">
-              <a class="mf-household-switcher" href="/households/select">
-                <span>Espacio activo</span>
-                <strong><%= currentHousehold.name %></strong>
-              </a>
-              <button class="mf-primary-action" type="button" disabled title="El módulo de transacciones estará disponible próximamente">
-                <span aria-hidden="true">＋</span> Nueva transacción
-              </button>
-            </div>
-          </header>
+          <%- include('partials/app-header', {
+            headerEyebrow: 'Panel financiero',
+            headerTitle: `Hola, ${currentUser.name.split(' ')[0]}`,
+            primaryAction: null,
+          }) %>
 
           <div class="mf-dashboard-content">
             <section class="mf-metrics-grid" aria-label="Resumen financiero">
@@ -73,7 +26,11 @@
                   <span class="mf-metric-icon" aria-hidden="true">◫</span>
                   <span class="mf-chip">Balance total</span>
                 </div>
-                <strong class="mf-metric-value" data-currency-value="<%= dashboard.balance %>" data-currency="<%= dashboard.currency %>"></strong>
+                <strong
+                  class="mf-metric-value"
+                  data-currency-value="<%= dashboard.balance %>"
+                  data-currency="<%= dashboard.currency %>"
+                ></strong>
                 <p>Saldo consolidado de tus cuentas activas</p>
               </article>
 
@@ -82,12 +39,19 @@
                   <span class="mf-metric-icon mf-metric-icon--income" aria-hidden="true">↗</span>
                   <span class="mf-chip">Ingresos del mes</span>
                 </div>
-                <strong class="mf-metric-value" data-currency-value="<%= dashboard.income %>" data-currency="<%= dashboard.currency %>"></strong>
-                <p class="mf-trend <%= dashboard.incomeChange !== null && dashboard.incomeChange >= 0 ? 'is-positive' : 'is-negative' %>">
+                <strong
+                  class="mf-metric-value"
+                  data-currency-value="<%= dashboard.income %>"
+                  data-currency="<%= dashboard.currency %>"
+                ></strong>
+                <p
+                  class="mf-trend <%= dashboard.incomeChange !== null && dashboard.incomeChange >= 0 ? 'is-positive' : 'is-negative' %>"
+                >
                   <% if (dashboard.incomeChange === null) { %>
                     Sin comparación disponible
                   <% } else { %>
-                    <%= dashboard.incomeChange >= 0 ? '↑' : '↓' %> <%= Math.abs(dashboard.incomeChange) %>% vs. mes anterior
+                    <%= dashboard.incomeChange >= 0 ? '↑' : '↓' %>
+                    <%= Math.abs(dashboard.incomeChange) %>% vs. mes anterior
                   <% } %>
                 </p>
               </article>
@@ -97,12 +61,19 @@
                   <span class="mf-metric-icon mf-metric-icon--expense" aria-hidden="true">↘</span>
                   <span class="mf-chip">Gastos del mes</span>
                 </div>
-                <strong class="mf-metric-value" data-currency-value="<%= dashboard.expense %>" data-currency="<%= dashboard.currency %>"></strong>
-                <p class="mf-trend <%= dashboard.expenseChange !== null && dashboard.expenseChange <= 0 ? 'is-positive' : 'is-negative' %>">
+                <strong
+                  class="mf-metric-value"
+                  data-currency-value="<%= dashboard.expense %>"
+                  data-currency="<%= dashboard.currency %>"
+                ></strong>
+                <p
+                  class="mf-trend <%= dashboard.expenseChange !== null && dashboard.expenseChange <= 0 ? 'is-positive' : 'is-negative' %>"
+                >
                   <% if (dashboard.expenseChange === null) { %>
                     Sin comparación disponible
                   <% } else { %>
-                    <%= dashboard.expenseChange >= 0 ? '↑' : '↓' %> <%= Math.abs(dashboard.expenseChange) %>% vs. mes anterior
+                    <%= dashboard.expenseChange >= 0 ? '↑' : '↓' %>
+                    <%= Math.abs(dashboard.expenseChange) %>% vs. mes anterior
                   <% } %>
                 </p>
               </article>
@@ -112,12 +83,24 @@
               <section class="mf-budget-alert" aria-label="Alerta de presupuesto">
                 <span class="mf-budget-alert__icon" aria-hidden="true">!</span>
                 <div>
-                  <strong>Presupuesto de <%= dashboard.budgetAlert.name %> al <%= dashboard.budgetAlert.percentage %>%</strong>
+                  <strong>
+                    Presupuesto de <%= dashboard.budgetAlert.name %> al
+                    <%= dashboard.budgetAlert.percentage %>%
+                  </strong>
                   <p>Has utilizado una parte importante del presupuesto mensual asignado.</p>
                 </div>
                 <div class="mf-budget-alert__amount">
-                  <strong data-currency-value="<%= dashboard.budgetAlert.spent %>" data-currency="<%= dashboard.currency %>"></strong>
-                  <span>de <span data-currency-value="<%= dashboard.budgetAlert.limit %>" data-currency="<%= dashboard.currency %>"></span></span>
+                  <strong
+                    data-currency-value="<%= dashboard.budgetAlert.spent %>"
+                    data-currency="<%= dashboard.currency %>"
+                  ></strong>
+                  <span>
+                    de
+                    <span
+                      data-currency-value="<%= dashboard.budgetAlert.limit %>"
+                      data-currency="<%= dashboard.currency %>"
+                    ></span>
+                  </span>
                 </div>
               </section>
             <% } %>
@@ -134,7 +117,11 @@
                     <span><i class="is-expense"></i> Gastos</span>
                   </div>
                 </div>
-                <div class="mf-bar-chart" data-monthly-series='<%- JSON.stringify(dashboard.monthlySeries) %>' aria-label="Gráfica de ingresos y gastos"></div>
+                <div
+                  class="mf-bar-chart"
+                  data-monthly-series='<%- JSON.stringify(dashboard.monthlySeries) %>'
+                  aria-label="Gráfica de ingresos y gastos"
+                ></div>
               </article>
 
               <article class="mf-panel">
@@ -145,7 +132,10 @@
                   </div>
                 </div>
                 <% if (dashboard.categoryExpenses.length) { %>
-                  <div class="mf-category-chart" data-category-expenses='<%- JSON.stringify(dashboard.categoryExpenses) %>'>
+                  <div
+                    class="mf-category-chart"
+                    data-category-expenses='<%- JSON.stringify(dashboard.categoryExpenses) %>'
+                  >
                     <div class="mf-donut" aria-hidden="true"></div>
                     <ul class="mf-category-list"></ul>
                   </div>
@@ -167,17 +157,39 @@
                   <div class="mf-transactions-table-wrap">
                     <table class="mf-transactions-table">
                       <thead>
-                        <tr><th>Descripción</th><th>Categoría</th><th>Cuenta</th><th>Fecha</th><th>Monto</th></tr>
+                        <tr>
+                          <th>Descripción</th>
+                          <th>Categoría</th>
+                          <th>Cuenta</th>
+                          <th>Fecha</th>
+                          <th>Monto</th>
+                        </tr>
                       </thead>
                       <tbody>
                         <% dashboard.recentTransactions.forEach((transaction) => { %>
                           <tr>
-                            <td data-label="Descripción"><strong><%= transaction.description %></strong></td>
-                            <td data-label="Categoría"><%= transaction.category?.name ?? 'Sin categoría' %></td>
+                            <td data-label="Descripción">
+                              <strong><%= transaction.description %></strong>
+                            </td>
+                            <td data-label="Categoría">
+                              <%= transaction.category?.name ?? 'Sin categoría' %>
+                            </td>
                             <td data-label="Cuenta"><%= transaction.account.name %></td>
-                            <td data-label="Fecha"><%= new Intl.DateTimeFormat('es-PA', { day: '2-digit', month: 'short', timeZone: 'UTC' }).format(transaction.transactionDate) %></td>
-                            <td data-label="Monto" class="<%= transaction.transactionType === 1 || transaction.transactionType === 4 ? 'is-income' : 'is-expense' %>">
-                              <%= transaction.transactionType === 1 || transaction.transactionType === 4 ? '+' : '-' %><span data-currency-value="<%= transaction.amount %>" data-currency="<%= dashboard.currency %>"></span>
+                            <td data-label="Fecha">
+                              <%= new Intl.DateTimeFormat('es-PA', {
+                                day: '2-digit',
+                                month: 'short',
+                                timeZone: 'UTC',
+                              }).format(transaction.transactionDate) %>
+                            </td>
+                            <td
+                              data-label="Monto"
+                              class="<%= transaction.transactionType === 1 || transaction.transactionType === 4 ? 'is-income' : 'is-expense' %>"
+                            >
+                              <%= transaction.transactionType === 1 || transaction.transactionType === 4 ? '+' : '-' %><span
+                                data-currency-value="<%= transaction.amount %>"
+                                data-currency="<%= dashboard.currency %>"
+                              ></span>
                             </td>
                           </tr>
                         <% }) %>
@@ -204,47 +216,98 @@
                           <strong><%= budget.name %></strong>
                           <span><%= budget.percentage %>%</span>
                         </div>
-                        <div class="mf-progress" role="progressbar" aria-valuenow="<%= Math.min(budget.percentage, 100) %>" aria-valuemin="0" aria-valuemax="100">
+                        <div
+                          class="mf-progress"
+                          role="progressbar"
+                          aria-valuenow="<%= Math.min(budget.percentage, 100) %>"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                        >
                           <span style="width: <%= Math.min(budget.percentage, 100) %>%"></span>
                         </div>
-                        <p><span data-currency-value="<%= budget.spent %>" data-currency="<%= dashboard.currency %>"></span> de <span data-currency-value="<%= budget.limit %>" data-currency="<%= dashboard.currency %>"></span></p>
+                        <p>
+                          <span
+                            data-currency-value="<%= budget.spent %>"
+                            data-currency="<%= dashboard.currency %>"
+                          ></span>
+                          de
+                          <span
+                            data-currency-value="<%= budget.limit %>"
+                            data-currency="<%= dashboard.currency %>"
+                          ></span>
+                        </p>
                       </div>
                     <% }) %>
                   </div>
                 <% } else { %>
-                  <div class="mf-empty-state">No hay presupuestos configurados para este mes.</div>
+                  <div class="mf-empty-state">
+                    No hay presupuestos configurados para este mes.
+                  </div>
                 <% } %>
               </article>
             </section>
           </div>
         </main>
       </div>
-    <% } else { %>
-      <%- include('partials/navbar') %>
-      <main class="container py-5 flex-grow-1">
-        <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
-          <% if (currentUser) { %>
-            <span class="badge text-bg-warning mb-3">Espacio pendiente</span>
-            <h1 class="display-5 fw-bold">Hola, <%= currentUser.name %></h1>
-            <p class="lead">Selecciona el espacio financiero que deseas utilizar antes de consultar o modificar datos.</p>
-            <a class="btn btn-primary" href="/households/select">Seleccionar espacio</a>
-          <% } else { %>
-            <span class="badge text-bg-primary mb-3">Mendo Finanzas</span>
-            <h1 class="display-5 fw-bold">Organiza tus finanzas con claridad</h1>
-            <p class="lead">Crea una cuenta o inicia sesión para comenzar.</p>
-            <div class="d-flex flex-wrap gap-2 mb-4">
-              <a class="btn btn-primary" href="/auth/register">Crear cuenta</a>
-              <a class="btn btn-outline-primary" href="/auth/login">Iniciar sesión</a>
+    </body>
+  <% } else if (currentUser) { %>
+    <body class="mf-app-body">
+      <div class="mf-workspace-shell">
+        <%- include('partials/app-sidebar', { activeSection: 'household' }) %>
+        <button
+          class="mf-sidebar-backdrop"
+          type="button"
+          data-sidebar-close
+          aria-label="Cerrar menú"
+        ></button>
+        <main class="mf-workspace-main">
+          <%- include('partials/app-header', {
+            headerEyebrow: 'Contexto financiero',
+            headerTitle: `Hola, ${currentUser.name.split(' ')[0]}`,
+            primaryAction: { href: '/households/new', label: 'Crear espacio' },
+          }) %>
+          <div class="mf-workspace-content">
+            <div class="mf-form-shell">
+              <section class="mf-form-panel">
+                <div class="mf-form-panel__header">
+                  <span class="mf-page-kicker">Espacio pendiente</span>
+                  <h2>Selecciona tu contexto financiero</h2>
+                  <p>
+                    Elige el espacio que deseas utilizar antes de consultar o modificar datos.
+                  </p>
+                </div>
+                <div class="mf-form-actions">
+                  <a class="mf-button mf-button--primary" href="/households/select">
+                    Seleccionar espacio
+                  </a>
+                  <a class="mf-button mf-button--ghost" href="/security">Seguridad</a>
+                </div>
+              </section>
             </div>
-          <% } %>
-          <dl class="row mt-4 mb-0">
-            <dt class="col-sm-3">Aplicación</dt><dd class="col-sm-9 text-success">Activa</dd>
-            <dt class="col-sm-3">Base de datos</dt><dd class="col-sm-9"><span class="badge <%= databaseStatus === 'up' ? 'text-bg-success' : 'text-bg-danger' %>"><%= databaseStatus === 'up' ? 'Disponible' : 'No disponible' %></span></dd>
-            <dt class="col-sm-3">Entorno</dt><dd class="col-sm-9"><code><%= environment %></code></dd>
-          </dl>
+          </div>
+        </main>
+      </div>
+    </body>
+  <% } else { %>
+    <body class="mf-auth-body">
+      <%- include('partials/navbar') %>
+      <main class="flex-grow-1">
+        <section class="mf-public-hero">
+          <div class="mf-public-hero__content">
+            <span class="mf-auth-card__badge">Mendo Finanzas</span>
+            <h1>Organiza tus finanzas con claridad.</h1>
+            <p>
+              Administra cuentas, categorías y presupuestos desde una plataforma segura y fácil
+              de entender.
+            </p>
+            <div class="mf-public-hero__actions">
+              <a class="mf-button mf-button--primary" href="/auth/register">Crear cuenta</a>
+              <a class="mf-button mf-button--ghost" href="/auth/login">Iniciar sesión</a>
+            </div>
+          </div>
         </section>
       </main>
       <%- include('partials/footer') %>
-    <% } %>
-  </body>
+    </body>
+  <% } %>
 </html>
