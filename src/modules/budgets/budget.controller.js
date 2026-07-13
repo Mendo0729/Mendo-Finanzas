@@ -4,7 +4,8 @@ import * as budgetService from './budget.service.js';
 function formValues(budget = null, defaultMonth = null) {
   return {
     categoryId: budget?.categoryId ?? '',
-    month: budget?.month ?? budgetService.monthKey(defaultMonth ?? budgetService.currentMonthStart()),
+    month:
+      budget?.month ?? budgetService.monthKey(defaultMonth ?? budgetService.currentMonthStart()),
     amount: budget?.amount ?? '',
   };
 }
