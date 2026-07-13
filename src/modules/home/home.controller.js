@@ -91,7 +91,7 @@ async function getDashboardData(household) {
     await Promise.all([
       prisma.account.findMany({
         where: { householdId: household.id, active: true },
-        select: { id: true, accountType: true, initialBalance: true },
+        select: { id: true, initialBalance: true },
       }),
       prisma.transaction.groupBy({
         by: ['transactionType'],
@@ -193,10 +193,15 @@ async function getDashboardData(household) {
   });
   const categoryMap = new Map(categories.map((category) => [category.id.toString(), category]));
 
-  const categoryExpenses = expenseByCategoryRows.slice(0, 5).map((row) => ({
-    ...categoryMap.get(row.categoryId.toString()),
-    amount: Number(row._sum.amount ?? 0),
-  }));
+  const categoryExpenses = expenseByCategoryRows.slice(0, 5).map((row) => {
+    const category = categoryMap.get(row.categoryId.toString());
+
+    return {
+      name: category?.name ?? 'Sin categoría',
+      icon: category?.icon ?? null,
+      amount: Number(row._sum.amount ?? 0),
+    };
+  });
 
   const budgetCategoryIds = budgets.map((budget) => budget.categoryId);
   const budgetExpenses = budgetCategoryIds.length
