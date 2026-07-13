@@ -10,7 +10,10 @@ function formatCurrency(value, currency) {
 
 function initializeCurrencyValues() {
   document.querySelectorAll('[data-currency-value]').forEach((element) => {
-    element.textContent = formatCurrency(element.dataset.currencyValue, element.dataset.currency || 'USD');
+    element.textContent = formatCurrency(
+      element.dataset.currencyValue,
+      element.dataset.currency || 'USD',
+    );
   });
 }
 

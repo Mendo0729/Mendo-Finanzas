@@ -87,58 +87,64 @@ async function getDashboardData(household) {
     deletedAt: null,
   };
 
-  const [accounts, currentTotals, previousTotals, historyTransactions, recentTransactions, budgets] =
-    await Promise.all([
-      prisma.account.findMany({
-        where: { householdId: household.id, active: true },
-        select: { id: true, initialBalance: true },
-      }),
-      prisma.transaction.groupBy({
-        by: ['transactionType'],
-        where: {
-          ...baseTransactionFilter,
-          transactionDate: { gte: currentMonthStart, lt: nextMonthStart },
-          transactionType: { in: [TRANSACTION_TYPE.INCOME, TRANSACTION_TYPE.EXPENSE] },
-        },
-        _sum: { amount: true },
-      }),
-      prisma.transaction.groupBy({
-        by: ['transactionType'],
-        where: {
-          ...baseTransactionFilter,
-          transactionDate: { gte: previousMonthStart, lt: currentMonthStart },
-          transactionType: { in: [TRANSACTION_TYPE.INCOME, TRANSACTION_TYPE.EXPENSE] },
-        },
-        _sum: { amount: true },
-      }),
-      prisma.transaction.findMany({
-        where: {
-          ...baseTransactionFilter,
-          transactionDate: { gte: historyStart, lt: nextMonthStart },
-          transactionType: { in: [TRANSACTION_TYPE.INCOME, TRANSACTION_TYPE.EXPENSE] },
-        },
-        select: { transactionType: true, amount: true, transactionDate: true },
-      }),
-      prisma.transaction.findMany({
-        where: baseTransactionFilter,
-        orderBy: [{ transactionDate: 'desc' }, { createdAt: 'desc' }],
-        take: 5,
-        select: {
-          id: true,
-          description: true,
-          amount: true,
-          transactionType: true,
-          transactionDate: true,
-          category: { select: { name: true, icon: true } },
-          account: { select: { name: true } },
-        },
-      }),
-      prisma.budget.findMany({
-        where: { householdId: household.id, monthStart: currentMonthStart },
-        include: { category: { select: { id: true, name: true, icon: true } } },
-        orderBy: { amount: 'desc' },
-      }),
-    ]);
+  const [
+    accounts,
+    currentTotals,
+    previousTotals,
+    historyTransactions,
+    recentTransactions,
+    budgets,
+  ] = await Promise.all([
+    prisma.account.findMany({
+      where: { householdId: household.id, active: true },
+      select: { id: true, initialBalance: true },
+    }),
+    prisma.transaction.groupBy({
+      by: ['transactionType'],
+      where: {
+        ...baseTransactionFilter,
+        transactionDate: { gte: currentMonthStart, lt: nextMonthStart },
+        transactionType: { in: [TRANSACTION_TYPE.INCOME, TRANSACTION_TYPE.EXPENSE] },
+      },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.groupBy({
+      by: ['transactionType'],
+      where: {
+        ...baseTransactionFilter,
+        transactionDate: { gte: previousMonthStart, lt: currentMonthStart },
+        transactionType: { in: [TRANSACTION_TYPE.INCOME, TRANSACTION_TYPE.EXPENSE] },
+      },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.findMany({
+      where: {
+        ...baseTransactionFilter,
+        transactionDate: { gte: historyStart, lt: nextMonthStart },
+        transactionType: { in: [TRANSACTION_TYPE.INCOME, TRANSACTION_TYPE.EXPENSE] },
+      },
+      select: { transactionType: true, amount: true, transactionDate: true },
+    }),
+    prisma.transaction.findMany({
+      where: baseTransactionFilter,
+      orderBy: [{ transactionDate: 'desc' }, { createdAt: 'desc' }],
+      take: 5,
+      select: {
+        id: true,
+        description: true,
+        amount: true,
+        transactionType: true,
+        transactionDate: true,
+        category: { select: { name: true, icon: true } },
+        account: { select: { name: true } },
+      },
+    }),
+    prisma.budget.findMany({
+      where: { householdId: household.id, monthStart: currentMonthStart },
+      include: { category: { select: { id: true, name: true, icon: true } } },
+      orderBy: { amount: 'desc' },
+    }),
+  ]);
 
   const allAccountTransactions = await prisma.transaction.groupBy({
     by: ['accountId', 'transactionType'],
