@@ -4,21 +4,34 @@ Aplicación web para administrar finanzas personales, familiares y compartidas.
 
 ## Estado actual
 
-La base técnica incluye:
+La base técnica y funcional disponible incluye:
 
 - Node.js 22, Express 5 y EJS.
 - PostgreSQL 17 y Prisma ORM.
 - Arquitectura backend modular.
 - Registro, login y logout.
+- MFA mediante TOTP y códigos de recuperación.
 - Contraseñas protegidas con Argon2id.
 - Sesiones persistidas en PostgreSQL.
-- Protección CSRF y rate limiting para autenticación.
-- Selección de espacio financiero y contexto de membresía.
+- Protección CSRF, Helmet, CSP y rate limiting para autenticación.
+- Creación, selección y contexto de espacios financieros.
 - Roles `OWNER`, `ADMIN`, `EDITOR` y `VIEWER`.
 - Matriz central de permisos y aislamiento por `householdId`.
+- CRUD de cuentas y categorías con auditoría.
+- Dashboard con saldos, ingresos, gastos, movimientos recientes y avance de presupuestos.
 - Restricciones de integridad financiera y pruebas automatizadas.
 
-Todavía no están implementados TOTP, recuperación de contraseña, verificación de correo, creación de espacios, administración de integrantes ni los CRUD financieros.
+Bloqueadores pendientes para la versión `v1.0.0`:
+
+- CRUD completo de transacciones.
+- Transferencias atómicas entre cuentas.
+- CRUD e integración completa de presupuestos.
+- Recuperación de contraseña por correo.
+- Verificación de correo electrónico.
+- Rate limiting persistente.
+- Preparación del despliegue, HTTPS, backups y monitoreo.
+
+La base de datos productiva y el despliegue público no deben crearse hasta superar los controles previos a producción definidos para el proyecto.
 
 ## Requisitos
 
@@ -126,7 +139,7 @@ http://localhost:3000/health
 
 ## Autenticación
 
-Rutas disponibles:
+Rutas principales disponibles:
 
 ```text
 GET  /auth/register
@@ -142,6 +155,7 @@ Características principales:
 - Contraseñas de 12 a 128 caracteres.
 - Mensaje genérico para credenciales incorrectas.
 - Regeneración del identificador de sesión después de registro y login.
+- MFA mediante TOTP y códigos de recuperación de un solo uso.
 - Cookie `mendo.sid` con `HttpOnly`, `SameSite=Lax` y `Secure` en producción.
 - Sesiones guardadas en la tabla PostgreSQL `sessions`.
 - Tokens CSRF en formularios que modifican estado.
@@ -163,14 +177,14 @@ El espacio activo se guarda como `householdId` dentro de la sesión. La aplicaci
 
 Roles disponibles:
 
-| Código | Rol      | Descripción                                                   |
-| -----: | -------- | ------------------------------------------------------------- |
-|      1 | `OWNER`  | Control total del espacio.                                    |
+| Código | Rol      | Descripción                                                    |
+| -----: | -------- | -------------------------------------------------------------- |
+|      1 | `OWNER`  | Control total del espacio.                                     |
 |      2 | `ADMIN`  | Administración sin eliminación ni transferencia de propiedad. |
-|      3 | `EDITOR` | Consulta y modificación de datos financieros.                 |
-|      4 | `VIEWER` | Consulta sin modificación.                                    |
+|      3 | `EDITOR` | Consulta y modificación de datos financieros.                  |
+|      4 | `VIEWER` | Consulta sin modificación.                                     |
 
-Los próximos módulos financieros deben usar:
+Los módulos financieros deben usar:
 
 - `requireHouseholdMembership`.
 - `requireHouseholdPermission(...)`.
@@ -199,7 +213,7 @@ npm run test:db
 npm run test:http
 ```
 
-Las pruebas cubren autenticación, CSRF, Argon2id, sesiones PostgreSQL, selección de espacios, permisos por rol y rechazo de accesos entre espacios.
+Las pruebas cubren autenticación, MFA, CSRF, Argon2id, sesiones PostgreSQL, selección de espacios, permisos por rol, cuentas, categorías, auditoría y rechazo de accesos entre espacios.
 
 ## Estructura principal
 
