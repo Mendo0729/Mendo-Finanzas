@@ -18,7 +18,11 @@ import {
   updateTransaction,
   voidTransaction,
 } from './transaction.controller.js';
-import { transactionBodySchema, transactionIdSchema } from './transaction.schemas.js';
+import {
+  transactionBodySchema,
+  transactionIdSchema,
+  transactionQuerySchema,
+} from './transaction.schemas.js';
 
 export const transactionRouter = Router();
 
@@ -27,6 +31,7 @@ transactionRouter.use(requireAuthentication, requireHouseholdMembership);
 transactionRouter.get(
   '/',
   requireHouseholdPermission(HOUSEHOLD_PERMISSIONS.TRANSACTIONS_VIEW),
+  validate({ query: transactionQuerySchema }),
   asyncHandler(listTransactions),
 );
 transactionRouter.get(
