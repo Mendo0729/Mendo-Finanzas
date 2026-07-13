@@ -1,11 +1,27 @@
 import { Router } from 'express';
 
 import { createRateLimiter } from '../../core/middleware/rate-limit.js';
+import { validate } from '../../core/middleware/validate.js';
 import { exposeCsrfToken, verifyCsrfToken } from '../../core/security/csrf.js';
 import { asyncHandler } from '../../core/utils/async-handler.js';
-import { login, logout, register, showLogin, showRegister } from './auth.controller.js';
+import {
+  login,
+  logout,
+  register,
+  showLogin,
+  showMfaChallenge,
+  showRegister,
+  verifyMfaChallenge,
+  verifyRecoveryChallenge,
+} from './auth.controller.js';
 import { requireAuthentication, requireGuest } from './auth.middleware.js';
-import { loginSchema, normalizeEmail, registerSchema } from './auth.schemas.js';
+import {
+  loginSchema,
+  mfaTokenSchema,
+  normalizeEmail,
+  recoveryCodeSchema,
+  registerSchema,
+} from './auth.schemas.js';
 import { validateAuthForm } from './auth.validation.js';
 
 const loginLimiter = createRateLimiter({
@@ -17,6 +33,12 @@ const loginLimiter = createRateLimiter({
 const registrationLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
   limit: 3,
+});
+
+const mfaLimiter = createRateLimiter({
+  windowMs: 10 * 60 * 1000,
+  limit: 8,
+  keyGenerator: (request) => `${request.ip}:${request.session?.pendingMfaUserId ?? 'none'}`,
 });
 
 export const authRouter = Router();
@@ -49,6 +71,26 @@ authRouter.post(
     pageTitle: 'Iniciar sesión',
   }),
   asyncHandler(login),
+);
+
+authRouter.get('/mfa', requireGuest, exposeCsrfToken, showMfaChallenge);
+authRouter.post(
+  '/mfa',
+  requireGuest,
+  exposeCsrfToken,
+  verifyCsrfToken,
+  mfaLimiter,
+  validate({ body: mfaTokenSchema }),
+  asyncHandler(verifyMfaChallenge),
+);
+authRouter.post(
+  '/mfa/recovery',
+  requireGuest,
+  exposeCsrfToken,
+  verifyCsrfToken,
+  mfaLimiter,
+  validate({ body: recoveryCodeSchema }),
+  asyncHandler(verifyRecoveryChallenge),
 );
 
 authRouter.post(

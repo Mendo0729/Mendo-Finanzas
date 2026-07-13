@@ -85,3 +85,37 @@ export async function confirmMfaSetup(rawUserId, token) {
   await securityRepository.enableMfa(userId, recoveryCodes.map(hashRecoveryCode));
   return recoveryCodes;
 }
+
+export async function verifyMfaLogin(rawUserId, token) {
+  const userId = parseUserId(rawUserId);
+  const mfa = await securityRepository.findMfaByUserId(userId);
+
+  if (!mfa?.enabled || !mfa.totpSecretEncrypted) {
+    throw new AuthenticationError('El desafío MFA ya no es válido.', {
+      code: 'MFA_CHALLENGE_INVALID',
+    });
+  }
+
+  const secret = decryptTotpSecret(mfa.totpSecretEncrypted);
+  if (!verifyTotp(secret, token)) {
+    throw new AuthenticationError('El código de autenticación no es válido.', {
+      code: 'INVALID_MFA_CODE',
+    });
+  }
+
+  await securityRepository.recordMfaVerification(userId);
+}
+
+export async function verifyRecoveryCode(rawUserId, recoveryCode) {
+  const userId = parseUserId(rawUserId);
+  const consumed = await securityRepository.consumeRecoveryCode(
+    userId,
+    hashRecoveryCode(recoveryCode),
+  );
+
+  if (!consumed) {
+    throw new AuthenticationError('El código de recuperación no es válido.', {
+      code: 'INVALID_RECOVERY_CODE',
+    });
+  }
+}

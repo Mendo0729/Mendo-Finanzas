@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+    <%- include('../partials/navbar') %>
+
+    <main class="container py-5 flex-grow-1">
+      <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
+            <span class="badge text-bg-primary mb-3">Segundo factor</span>
+            <h1 class="h2">Verificación en dos pasos</h1>
+            <p class="text-body-secondary">
+              Introduce el código de seis dígitos generado por Google Authenticator,
+              Microsoft Authenticator u otra aplicación compatible.
+            </p>
+
+            <% if (formError) { %>
+              <div class="alert alert-danger" role="alert"><%= formError %></div>
+            <% } %>
+
+            <form method="post" action="/auth/mfa" class="vstack gap-3 mb-4">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div>
+                <label class="form-label" for="token">Código de autenticación</label>
+                <input
+                  class="form-control form-control-lg text-center font-monospace"
+                  id="token"
+                  name="token"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  pattern="[0-9]{6}"
+                  maxlength="6"
+                  required
+                  autofocus
+                />
+              </div>
+              <button class="btn btn-primary" type="submit">Verificar e iniciar sesión</button>
+            </form>
+
+            <details class="border rounded-3 p-3">
+              <summary class="fw-semibold">Usar un código de recuperación</summary>
+              <form method="post" action="/auth/mfa/recovery" class="vstack gap-3 mt-3">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <div>
+                  <label class="form-label" for="recoveryCode">Código de recuperación</label>
+                  <input
+                    class="form-control font-monospace text-uppercase"
+                    id="recoveryCode"
+                    name="recoveryCode"
+                    type="text"
+                    autocomplete="off"
+                    maxlength="20"
+                    required
+                  />
+                  <div class="form-text">Cada código puede utilizarse una sola vez.</div>
+                </div>
+                <button class="btn btn-outline-primary" type="submit">
+                  Iniciar sesión con código de recuperación
+                </button>
+              </form>
+            </details>
+
+            <div class="mt-4">
+              <a class="btn btn-link px-0" href="/auth/login">Cancelar y volver al inicio de sesión</a>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>

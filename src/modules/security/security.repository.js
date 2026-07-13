@@ -40,3 +40,34 @@ export function enableMfa(userId, recoveryCodeHashes) {
     return mfa;
   });
 }
+
+export function recordMfaVerification(userId) {
+  return prisma.userMfa.update({
+    where: { userId },
+    data: { lastVerifiedAt: new Date() },
+  });
+}
+
+export function consumeRecoveryCode(userId, codeHash) {
+  return prisma.$transaction(async (transaction) => {
+    const code = await transaction.recoveryCode.findFirst({
+      where: { userId, codeHash, usedAt: null },
+    });
+
+    if (!code) return false;
+
+    const updated = await transaction.recoveryCode.updateMany({
+      where: { id: code.id, usedAt: null },
+      data: { usedAt: new Date() },
+    });
+
+    if (updated.count !== 1) return false;
+
+    await transaction.userMfa.update({
+      where: { userId },
+      data: { lastVerifiedAt: new Date() },
+    });
+
+    return true;
+  });
+}

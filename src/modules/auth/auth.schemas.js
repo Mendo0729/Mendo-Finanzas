@@ -46,10 +46,7 @@ export const registerSchema = {
       });
     }
 
-    if (issues.length > 0) {
-      throw new FormSchemaError(issues);
-    }
-
+    if (issues.length > 0) throw new FormSchemaError(issues);
     return { name, email, password };
   },
 };
@@ -68,10 +65,19 @@ export const loginSchema = {
       issues.push({ path: ['password'], message: 'Ingresa tu contraseña.' });
     }
 
-    if (issues.length > 0) {
-      throw new FormSchemaError(issues);
-    }
-
+    if (issues.length > 0) throw new FormSchemaError(issues);
     return { email, password };
+  },
+};
+
+export const mfaTokenSchema = {
+  parse(value) {
+    return { token: text(value?.token).replace(/\s+/g, '') };
+  },
+};
+
+export const recoveryCodeSchema = {
+  parse(value) {
+    return { recoveryCode: text(value?.recoveryCode).trim() };
   },
 };

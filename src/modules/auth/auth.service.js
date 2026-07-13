@@ -52,6 +52,13 @@ export async function authenticateUser({ email, password }) {
     });
   }
 
-  const updatedUser = await authRepository.updateLastLogin(user.id);
-  return publicUser(updatedUser);
+  return {
+    ...publicUser(user),
+    mfaEnabled: Boolean(user.mfa?.enabled),
+  };
+}
+
+export async function completeAuthenticatedLogin(userId) {
+  const user = await authRepository.updateLastLogin(BigInt(userId));
+  return publicUser(user);
 }
