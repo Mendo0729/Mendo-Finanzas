@@ -27,6 +27,11 @@
 
             <div class="d-flex flex-wrap gap-2">
               <a class="btn btn-primary" href="/households/select">Cambiar espacio</a>
+              <% if (householdPermissions.includes('household:update')) { %>
+                <a class="btn btn-outline-primary" href="/households/<%= household.id %>/edit">
+                  Editar espacio
+                </a>
+              <% } %>
               <a class="btn btn-outline-secondary" href="/">Volver al inicio</a>
             </div>
           </section>
