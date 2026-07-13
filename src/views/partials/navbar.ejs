@@ -1,36 +1,5 @@
-<nav class="navbar navbar-expand-lg bg-white border-bottom" aria-label="Navegación principal">
-  <div class="container">
-    <a class="navbar-brand fw-semibold" href="/">Mendo Finanzas</a>
-
-    <div class="ms-auto d-flex flex-wrap justify-content-end align-items-center gap-2">
-      <% if (currentUser) { %>
-        <% if (currentHousehold) { %>
-          <% if (householdPermissions.includes('accounts:view')) { %>
-            <a class="btn btn-outline-primary btn-sm" href="/accounts">Cuentas</a>
-          <% } %>
-          <% if (householdPermissions.includes('categories:view')) { %>
-            <a class="btn btn-outline-primary btn-sm" href="/categories">Categorías</a>
-          <% } %>
-          <a class="btn btn-light btn-sm" href="/households/select">
-            <span class="d-none d-md-inline">Espacio:</span>
-            <strong><%= currentHousehold.name %></strong>
-          </a>
-        <% } else { %>
-          <a class="btn btn-warning btn-sm" href="/households/select">Seleccionar espacio</a>
-        <% } %>
-
-        <a class="btn btn-outline-secondary btn-sm" href="/security">Seguridad</a>
-        <span class="small text-body-secondary d-none d-lg-inline">
-          Sesión activa como <strong><%= currentUser.name %></strong>
-        </span>
-        <form method="post" action="/auth/logout" class="m-0">
-          <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-          <button class="btn btn-outline-danger btn-sm" type="submit">Cerrar sesión</button>
-        </form>
-      <% } else { %>
-        <a class="btn btn-outline-primary btn-sm" href="/auth/login">Iniciar sesión</a>
-        <a class="btn btn-primary btn-sm" href="/auth/register">Crear cuenta</a>
-      <% } %>
-    </div>
-  </div>
-</nav>
+<% if (currentUser) { %>
+  <%- include('account-header') %>
+<% } else { %>
+  <%- include('public-header') %>
+<% } %>

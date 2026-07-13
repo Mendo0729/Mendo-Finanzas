@@ -1,0 +1,37 @@
+<header class="mf-account-header">
+  <div class="mf-account-header__inner">
+    <a class="mf-public-brand" href="/" aria-label="Ir al inicio de Mendo Finanzas">
+      <span class="mf-public-brand__mark" aria-hidden="true">MF</span>
+      <span class="mf-public-brand__copy">
+        <strong>Mendo Finanzas</strong>
+        <small><%= currentHousehold ? currentHousehold.name : 'Cuenta personal' %></small>
+      </span>
+    </a>
+
+    <nav class="mf-account-header__actions" aria-label="Opciones de cuenta">
+      <% if (currentHousehold) { %>
+        <% if (householdPermissions.includes('accounts:view')) { %>
+          <a class="mf-button mf-button--ghost" href="/accounts">Cuentas</a>
+        <% } %>
+        <% if (householdPermissions.includes('categories:view')) { %>
+          <a class="mf-button mf-button--ghost" href="/categories">Categorías</a>
+        <% } %>
+      <% } %>
+
+      <a class="mf-button mf-button--soft" href="/households/select">
+        <%= currentHousehold ? 'Cambiar espacio' : 'Seleccionar espacio' %>
+      </a>
+      <a class="mf-button mf-button--ghost" href="/security">Seguridad</a>
+
+      <div class="mf-account-identity">
+        <span>Sesión activa</span>
+        <strong><%= currentUser.name %></strong>
+      </div>
+
+      <form method="post" action="/auth/logout" class="m-0">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+        <button class="mf-button mf-button--danger-ghost" type="submit">Cerrar sesión</button>
+      </form>
+    </nav>
+  </div>
+</header>

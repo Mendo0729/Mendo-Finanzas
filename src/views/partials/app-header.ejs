@@ -1,0 +1,27 @@
+<header class="mf-topbar">
+  <div class="mf-topbar__title">
+    <button class="mf-menu-button" type="button" data-sidebar-toggle aria-controls="appSidebar" aria-expanded="false">
+      <span></span><span></span><span></span>
+      <span class="visually-hidden">Abrir menú</span>
+    </button>
+    <div>
+      <p><%= headerEyebrow ?? 'Mendo Finanzas' %></p>
+      <h1><%= headerTitle ?? pageTitle %></h1>
+    </div>
+  </div>
+
+  <div class="mf-topbar__actions">
+    <% if (currentHousehold) { %>
+      <a class="mf-household-switcher" href="/households/select">
+        <span>Espacio activo</span>
+        <strong><%= currentHousehold.name %></strong>
+      </a>
+    <% } %>
+
+    <% if (typeof primaryAction !== 'undefined' && primaryAction) { %>
+      <a class="mf-primary-action text-decoration-none d-inline-flex align-items-center" href="<%= primaryAction.href %>">
+        <span aria-hidden="true">＋</span>&nbsp;<%= primaryAction.label %>
+      </a>
+    <% } %>
+  </div>
+</header>
