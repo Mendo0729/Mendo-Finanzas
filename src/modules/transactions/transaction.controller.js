@@ -1,5 +1,10 @@
 import { buildAuditActor } from '../../core/audit/audit.constants.js';
-import { TRANSACTION_TYPE_OPTIONS, TRANSACTION_TYPES } from './transaction.constants.js';
+import {
+  TRANSACTION_SORT_OPTIONS,
+  TRANSACTION_SORTS,
+  TRANSACTION_TYPE_OPTIONS,
+  TRANSACTION_TYPES,
+} from './transaction.constants.js';
 import * as transactionService from './transaction.service.js';
 
 function formValues(transaction = null) {
@@ -14,6 +19,35 @@ function formValues(transaction = null) {
   };
 }
 
+function buildPageUrl(filters, page) {
+  const parameters = new URLSearchParams();
+  const entries = {
+    search: filters.search,
+    fromDate: filters.fromDate,
+    toDate: filters.toDate,
+    accountId: filters.accountId,
+    categoryId: filters.categoryId,
+    transactionType: filters.transactionType,
+    minAmount: filters.minAmount,
+    maxAmount: filters.maxAmount,
+  };
+
+  for (const [key, value] of Object.entries(entries)) {
+    if (value !== '' && value !== null && value !== undefined) {
+      parameters.set(key, String(value));
+    }
+  }
+  if (filters.sort !== TRANSACTION_SORTS.DATE_DESC) {
+    parameters.set('sort', filters.sort);
+  }
+  if (page > 1) {
+    parameters.set('page', String(page));
+  }
+
+  const query = parameters.toString();
+  return query ? `/transactions?${query}` : '/transactions';
+}
+
 async function renderTransactionForm(response, householdId, transaction = null) {
   response.render('transactions/form', {
     pageTitle: transaction ? 'Editar movimiento' : 'Nuevo movimiento',
@@ -26,9 +60,27 @@ async function renderTransactionForm(response, householdId, transaction = null) 
 }
 
 export async function listTransactions(request, response) {
+  const householdId = request.context.household.id;
+  const [result, options] = await Promise.all([
+    transactionService.searchTransactions(householdId, request.validated.query),
+    transactionService.getTransactionFormOptions(householdId),
+  ]);
+
   response.render('transactions/index', {
     pageTitle: 'Movimientos',
-    transactions: await transactionService.listTransactions(request.context.household.id),
+    transactionTypes: TRANSACTION_TYPE_OPTIONS,
+    sortOptions: TRANSACTION_SORT_OPTIONS,
+    ...options,
+    ...result,
+    pagination: {
+      ...result.pagination,
+      previousUrl: result.pagination.hasPreviousPage
+        ? buildPageUrl(result.filters, result.pagination.currentPage - 1)
+        : null,
+      nextUrl: result.pagination.hasNextPage
+        ? buildPageUrl(result.filters, result.pagination.currentPage + 1)
+        : null,
+    },
   });
 }
 

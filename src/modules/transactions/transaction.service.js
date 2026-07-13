@@ -1,6 +1,19 @@
 import { NotFoundError } from '../../core/errors/app-error.js';
-import { getTransactionTypeLabel } from './transaction.constants.js';
+import { getTransactionTypeLabel, TRANSACTION_SORTS } from './transaction.constants.js';
 import * as transactionRepository from './transaction.repository.js';
+
+const DEFAULT_TRANSACTION_FILTERS = Object.freeze({
+  search: null,
+  fromDate: null,
+  toDate: null,
+  accountId: null,
+  categoryId: null,
+  transactionType: null,
+  minAmount: null,
+  maxAmount: null,
+  page: 1,
+  sort: TRANSACTION_SORTS.DATE_DESC,
+});
 
 function mapTransaction(transaction) {
   return {
@@ -28,6 +41,33 @@ function mapTransaction(transaction) {
   };
 }
 
+function mapFilters(filters) {
+  return {
+    search: filters.search ?? '',
+    fromDate: filters.fromDate?.toISOString().slice(0, 10) ?? '',
+    toDate: filters.toDate?.toISOString().slice(0, 10) ?? '',
+    accountId: filters.accountId?.toString() ?? '',
+    categoryId: filters.categoryId?.toString() ?? '',
+    transactionType: filters.transactionType ?? '',
+    minAmount: filters.minAmount ?? '',
+    maxAmount: filters.maxAmount ?? '',
+    sort: filters.sort,
+  };
+}
+
+function hasActiveFilters(filters) {
+  return Boolean(
+    filters.search ||
+    filters.fromDate ||
+    filters.toDate ||
+    filters.accountId ||
+    filters.categoryId ||
+    filters.transactionType ||
+    filters.minAmount ||
+    filters.maxAmount,
+  );
+}
+
 function throwRepositoryError(error) {
   if (error === 'TRANSACTION_NOT_FOUND') {
     throw new NotFoundError('El movimiento solicitado no existe.', {
@@ -46,8 +86,25 @@ function throwRepositoryError(error) {
   }
 }
 
+export async function searchTransactions(householdId, filters) {
+  const result = await transactionRepository.listTransactions(householdId, filters);
+  return {
+    transactions: result.transactions.map(mapTransaction),
+    filters: mapFilters(filters),
+    hasActiveFilters: hasActiveFilters(filters),
+    pagination: {
+      total: result.total,
+      currentPage: result.currentPage,
+      totalPages: result.totalPages,
+      pageSize: result.pageSize,
+      hasPreviousPage: result.currentPage > 1,
+      hasNextPage: result.currentPage < result.totalPages,
+    },
+  };
+}
+
 export async function listTransactions(householdId) {
-  return (await transactionRepository.listTransactions(householdId)).map(mapTransaction);
+  return (await searchTransactions(householdId, DEFAULT_TRANSACTION_FILTERS)).transactions;
 }
 
 export async function requireTransaction(householdId, transactionId) {
@@ -61,8 +118,14 @@ export async function requireTransaction(householdId, transactionId) {
 export async function getTransactionFormOptions(householdId) {
   const { accounts, categories } = await transactionRepository.listFormOptions(householdId);
   return {
-    accounts: accounts.map((account) => ({ ...account, id: account.id.toString() })),
-    categories: categories.map((category) => ({ ...category, id: category.id.toString() })),
+    accounts: accounts.map((account) => ({
+      ...account,
+      id: account.id.toString(),
+    })),
+    categories: categories.map((category) => ({
+      ...category,
+      id: category.id.toString(),
+    })),
   };
 }
 
