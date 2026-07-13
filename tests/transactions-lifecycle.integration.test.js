@@ -142,41 +142,38 @@ after(async () => {
   await prisma.$disconnect();
 });
 
-test(
-  'consulta el detalle sin revelar movimientos de otros espacios ni transferencias',
-  async () => {
-    const created = await createExpense(`Detalle ${suffix}`);
-    const detail = await transactionService.requireTransaction(householdA.id, BigInt(created.id));
+test('consulta el detalle sin revelar movimientos de otros espacios ni transferencias', async () => {
+  const created = await createExpense(`Detalle ${suffix}`);
+  const detail = await transactionService.requireTransaction(householdA.id, BigInt(created.id));
 
-    assert.equal(detail.id, created.id);
-    assert.equal(detail.account.name, accountA.name);
-    assert.equal(detail.creator.name, userA.name);
+  assert.equal(detail.id, created.id);
+  assert.equal(detail.account.name, accountA.name);
+  assert.equal(detail.creator.name, userA.name);
 
-    await assert.rejects(
-      transactionService.requireTransaction(householdB.id, BigInt(created.id)),
-      (error) => error.code === 'TRANSACTION_NOT_FOUND',
-    );
+  await assert.rejects(
+    transactionService.requireTransaction(householdB.id, BigInt(created.id)),
+    (error) => error.code === 'TRANSACTION_NOT_FOUND',
+  );
 
-    const transfer = await prisma.transaction.create({
-      data: {
-        householdId: householdA.id,
-        accountId: accountA.id,
-        categoryId: null,
-        createdBy: userA.id,
-        transactionType: 3,
-        amount: 10,
-        description: 'Transferencia reservada',
-        transactionDate: new Date('2026-07-13T00:00:00.000Z'),
-        transferGroupId: randomUUID(),
-      },
-    });
+  const transfer = await prisma.transaction.create({
+    data: {
+      householdId: householdA.id,
+      accountId: accountA.id,
+      categoryId: null,
+      createdBy: userA.id,
+      transactionType: 3,
+      amount: 10,
+      description: 'Transferencia reservada',
+      transactionDate: new Date('2026-07-13T00:00:00.000Z'),
+      transferGroupId: randomUUID(),
+    },
+  });
 
-    await assert.rejects(
-      transactionService.requireTransaction(householdA.id, transfer.id),
-      (error) => error.code === 'TRANSACTION_NOT_FOUND',
-    );
-  },
-);
+  await assert.rejects(
+    transactionService.requireTransaction(householdA.id, transfer.id),
+    (error) => error.code === 'TRANSACTION_NOT_FOUND',
+  );
+});
 
 test('edita un movimiento y conserva valores anteriores y nuevos en auditoría', async () => {
   const created = await createExpense(`Editar ${suffix}`);
@@ -250,7 +247,10 @@ test('anula lógicamente el movimiento, lo excluye del listado y registra audito
   assert.ok(stored.deletedAt);
 
   const listed = await transactionService.listTransactions(householdA.id);
-  assert.equal(listed.some(({ id }) => id === created.id), false);
+  assert.equal(
+    listed.some(({ id }) => id === created.id),
+    false,
+  );
 
   await assert.rejects(
     transactionService.requireTransaction(householdA.id, BigInt(created.id)),
