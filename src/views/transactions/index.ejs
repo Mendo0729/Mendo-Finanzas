@@ -60,6 +60,20 @@
                   <% if (transaction.notes) { %>
                     <p class="mb-0"><%= transaction.notes %></p>
                   <% } %>
+
+                  <div class="mf-account-card__actions">
+                    <a class="mf-small-button" href="/transactions/<%= transaction.id %>">
+                      Ver detalle
+                    </a>
+                    <% if (householdPermissions.includes('transactions:manage')) { %>
+                      <a
+                        class="mf-small-button mf-small-button--primary"
+                        href="/transactions/<%= transaction.id %>/edit"
+                      >
+                        Editar
+                      </a>
+                    <% } %>
+                  </div>
                 </article>
               <% }) %>
             </section>
