@@ -71,19 +71,14 @@ export function createHousehold(userId, data, actor) {
     });
 
     await transaction.auditLog.create({
-      data: auditData(
-        { ...actor, householdId: household.id },
-        AUDIT_ACTIONS.CREATE,
-        household.id,
-        {
-          after: {
-            name: household.name,
-            currency: household.currency,
-            ownerUserId: userId.toString(),
-            defaultCategoryCount: DEFAULT_HOUSEHOLD_CATEGORIES.length,
-          },
+      data: auditData({ ...actor, householdId: household.id }, AUDIT_ACTIONS.CREATE, household.id, {
+        after: {
+          name: household.name,
+          currency: household.currency,
+          ownerUserId: userId.toString(),
+          defaultCategoryCount: DEFAULT_HOUSEHOLD_CATEGORIES.length,
         },
-      ),
+      }),
     });
 
     return household;
