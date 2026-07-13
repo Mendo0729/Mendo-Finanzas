@@ -79,6 +79,7 @@ export async function disableMfa(request, response, next) {
       });
       return;
     }
+
     next(error);
   }
 }
@@ -103,6 +104,7 @@ export async function regenerateRecoveryCodes(request, response, next) {
       });
       return;
     }
+
     next(error);
   }
 }
