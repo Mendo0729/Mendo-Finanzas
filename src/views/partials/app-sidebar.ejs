@@ -1,0 +1,49 @@
+<aside class="mf-sidebar" id="appSidebar" aria-label="Navegación principal del espacio">
+  <a class="mf-sidebar__brand" href="/" aria-label="Ir al dashboard">
+    <span class="mf-brand-mark" aria-hidden="true">MF</span>
+    <span>
+      <strong>Mendo Finanzas</strong>
+      <small>Plataforma financiera</small>
+    </span>
+  </a>
+
+  <nav class="mf-sidebar__nav">
+    <a class="mf-nav-link <%= activeSection === 'dashboard' ? 'is-active' : '' %>" href="/" <%- activeSection === 'dashboard' ? 'aria-current="page"' : '' %>>
+      <span aria-hidden="true">⌂</span> Dashboard
+    </a>
+
+    <span class="mf-nav-label">Administración</span>
+
+    <% if (householdPermissions.includes('accounts:view')) { %>
+      <a class="mf-nav-link <%= activeSection === 'accounts' ? 'is-active' : '' %>" href="/accounts" <%- activeSection === 'accounts' ? 'aria-current="page"' : '' %>>
+        <span aria-hidden="true">▣</span> Cuentas
+      </a>
+    <% } %>
+
+    <% if (householdPermissions.includes('categories:view')) { %>
+      <a class="mf-nav-link <%= activeSection === 'categories' ? 'is-active' : '' %>" href="/categories" <%- activeSection === 'categories' ? 'aria-current="page"' : '' %>>
+        <span aria-hidden="true">◇</span> Categorías
+      </a>
+    <% } %>
+
+    <a class="mf-nav-link <%= activeSection === 'household' ? 'is-active' : '' %>" href="/households/current" <%- activeSection === 'household' ? 'aria-current="page"' : '' %>>
+      <span aria-hidden="true">⌂</span> Espacio financiero
+    </a>
+
+    <a class="mf-nav-link <%= activeSection === 'security' ? 'is-active' : '' %>" href="/security" <%- activeSection === 'security' ? 'aria-current="page"' : '' %>>
+      <span aria-hidden="true">◉</span> Seguridad
+    </a>
+  </nav>
+
+  <div class="mf-sidebar__profile">
+    <div class="mf-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
+    <div class="mf-profile-copy">
+      <strong><%= currentUser.name %></strong>
+      <span><%= currentHouseholdRole?.label ?? 'Usuario' %></span>
+    </div>
+    <form method="post" action="/auth/logout">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+      <button class="mf-icon-button mf-icon-button--sidebar" type="submit" aria-label="Cerrar sesión">↪</button>
+    </form>
+  </div>
+</aside>
