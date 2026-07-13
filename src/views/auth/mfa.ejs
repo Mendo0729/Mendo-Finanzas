@@ -1,30 +1,43 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+  <body class="mf-auth-body">
     <%- include('../partials/navbar') %>
 
-    <main class="container py-5 flex-grow-1">
-      <div class="row justify-content-center">
-        <div class="col-md-7 col-lg-5">
-          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
-            <span class="badge text-bg-primary mb-3">Segundo factor</span>
-            <h1 class="h2">Verificación en dos pasos</h1>
-            <p class="text-body-secondary">
-              Introduce el código de seis dígitos generado por Google Authenticator,
-              Microsoft Authenticator u otra aplicación compatible.
+    <main class="mf-auth-main">
+      <div class="mf-auth-layout">
+        <section class="mf-auth-intro" aria-labelledby="mfaIntroTitle">
+          <span class="mf-auth-intro__eyebrow">Protección adicional</span>
+          <h1 id="mfaIntroTitle">Confirma que realmente eres tú.</h1>
+          <p>
+            La verificación en dos pasos protege tus espacios financieros incluso si alguien
+            obtiene tu contraseña.
+          </p>
+          <ul class="mf-auth-features">
+            <li>Código temporal de seis dígitos</li>
+            <li>Compatible con aplicaciones de autenticación</li>
+            <li>Códigos de recuperación de un solo uso</li>
+          </ul>
+        </section>
+
+        <section class="mf-auth-card" aria-labelledby="mfaTitle">
+          <div class="mf-auth-card__body">
+            <span class="mf-auth-card__badge">Segundo factor</span>
+            <h1 id="mfaTitle">Verificación en dos pasos</h1>
+            <p class="mf-auth-card__subtitle">
+              Introduce el código generado por tu aplicación de autenticación.
             </p>
 
             <% if (formError) { %>
-              <div class="alert alert-danger" role="alert"><%= formError %></div>
+              <div class="mf-auth-alert" role="alert"><%= formError %></div>
             <% } %>
 
-            <form method="post" action="/auth/mfa" class="vstack gap-3 mb-4">
+            <form class="mf-auth-form" method="post" action="/auth/mfa">
               <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-              <div>
-                <label class="form-label" for="token">Código de autenticación</label>
+              <div class="mf-auth-field">
+                <label for="token">Código de autenticación</label>
                 <input
-                  class="form-control form-control-lg text-center font-monospace"
+                  class="mf-auth-input mf-mfa-code"
                   id="token"
                   name="token"
                   type="text"
@@ -32,41 +45,47 @@
                   autocomplete="one-time-code"
                   pattern="[0-9]{6}"
                   maxlength="6"
+                  aria-describedby="tokenHelp"
                   required
                   autofocus
                 />
+                <p class="mf-auth-help" id="tokenHelp">Escribe los seis dígitos sin espacios.</p>
               </div>
-              <button class="btn btn-primary" type="submit">Verificar e iniciar sesión</button>
+              <button class="mf-auth-submit" type="submit">Verificar e iniciar sesión</button>
             </form>
 
-            <details class="border rounded-3 p-3">
-              <summary class="fw-semibold">Usar un código de recuperación</summary>
-              <form method="post" action="/auth/mfa/recovery" class="vstack gap-3 mt-3">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                <div>
-                  <label class="form-label" for="recoveryCode">Código de recuperación</label>
-                  <input
-                    class="form-control font-monospace text-uppercase"
-                    id="recoveryCode"
-                    name="recoveryCode"
-                    type="text"
-                    autocomplete="off"
-                    maxlength="20"
-                    required
-                  />
-                  <div class="form-text">Cada código puede utilizarse una sola vez.</div>
-                </div>
-                <button class="btn btn-outline-primary" type="submit">
-                  Iniciar sesión con código de recuperación
-                </button>
-              </form>
+            <div class="mf-auth-divider">o continúa con</div>
+
+            <details class="mf-recovery-panel">
+              <summary>Usar un código de recuperación</summary>
+              <div class="mf-recovery-panel__body">
+                <form class="mf-auth-form" method="post" action="/auth/mfa/recovery">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <div class="mf-auth-field">
+                    <label for="recoveryCode">Código de recuperación</label>
+                    <input
+                      class="mf-auth-input font-monospace text-uppercase"
+                      id="recoveryCode"
+                      name="recoveryCode"
+                      type="text"
+                      autocomplete="off"
+                      maxlength="20"
+                      required
+                    />
+                    <p class="mf-auth-help">Cada código puede utilizarse una sola vez.</p>
+                  </div>
+                  <button class="mf-button mf-button--ghost w-100" type="submit">
+                    Iniciar sesión con código de recuperación
+                  </button>
+                </form>
+              </div>
             </details>
 
-            <div class="mt-4">
-              <a class="btn btn-link px-0" href="/auth/login">Cancelar y volver al inicio de sesión</a>
-            </div>
-          </section>
-        </div>
+            <p class="mf-auth-switch">
+              <a href="/auth/login">Cancelar y volver al inicio de sesión</a>
+            </p>
+          </div>
+        </section>
       </div>
     </main>
 

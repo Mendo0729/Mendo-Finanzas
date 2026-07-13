@@ -1,57 +1,94 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
-    <%- include('../partials/navbar') %>
-    <main class="container py-5 flex-grow-1">
-      <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <div>
-          <h1 class="h2 mb-1">Cuentas</h1>
-          <p class="text-body-secondary mb-0">Administra las cuentas del espacio activo.</p>
-        </div>
-        <% if (householdPermissions.includes('accounts:manage')) { %>
-          <a class="btn btn-primary" href="/accounts/new">Nueva cuenta</a>
-        <% } %>
-      </div>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'accounts' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
 
-      <div class="row g-3">
-        <% accounts.forEach((account) => { %>
-          <div class="col-md-6 col-xl-4">
-            <article class="card h-100 shadow-sm border-0">
-              <div class="card-body">
-                <div class="d-flex justify-content-between gap-3">
-                  <h2 class="h5"><%= account.name %></h2>
-                  <span class="badge <%= account.active ? 'text-bg-success' : 'text-bg-secondary' %>">
-                    <%= account.active ? 'Activa' : 'Inactiva' %>
-                  </span>
-                </div>
-                <p class="text-body-secondary"><%= account.accountTypeLabel %></p>
-                <dl class="row small mb-3">
-                  <dt class="col-6">Moneda</dt><dd class="col-6"><%= account.currency %></dd>
-                  <dt class="col-6">Saldo inicial</dt><dd class="col-6"><%= account.initialBalance %></dd>
-                  <dt class="col-6">Movimientos</dt><dd class="col-6"><%= account.transactionCount %></dd>
-                </dl>
-                <% if (householdPermissions.includes('accounts:manage')) { %>
-                  <div class="d-flex flex-wrap gap-2">
-                    <a class="btn btn-outline-primary btn-sm" href="/accounts/<%= account.id %>/edit">Editar</a>
-                    <form method="post" action="/accounts/<%= account.id %>/status">
-                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                      <input type="hidden" name="active" value="<%= account.active ? 'false' : 'true' %>" />
-                      <button class="btn btn-outline-secondary btn-sm" type="submit">
-                        <%= account.active ? 'Desactivar' : 'Activar' %>
-                      </button>
-                    </form>
-                  </div>
-                <% } %>
-              </div>
-            </article>
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Administración',
+          headerTitle: 'Cuentas',
+          primaryAction: householdPermissions.includes('accounts:manage')
+            ? { href: '/accounts/new', label: 'Nueva cuenta' }
+            : null,
+        }) %>
+
+        <div class="mf-workspace-content">
+          <div class="mf-page-intro">
+            <div>
+              <span class="mf-page-kicker">Espacio financiero</span>
+              <h2>Tus cuentas</h2>
+              <p>Consulta y administra las cuentas asociadas al espacio activo.</p>
+            </div>
           </div>
-        <% }) %>
-      </div>
-      <% if (accounts.length === 0) { %>
-        <div class="alert alert-info">Este espacio todavía no tiene cuentas.</div>
-      <% } %>
-    </main>
-    <%- include('../partials/footer') %>
+
+          <% if (accounts.length > 0) { %>
+            <section class="mf-account-grid" aria-label="Listado de cuentas">
+              <% accounts.forEach((account) => { %>
+                <article class="mf-account-card">
+                  <div class="mf-account-card__head">
+                    <div>
+                      <h3><%= account.name %></h3>
+                      <p><%= account.accountTypeLabel %></p>
+                    </div>
+                    <span
+                      class="mf-badge <%= account.active ? 'mf-badge--success' : 'mf-badge--danger' %>"
+                    >
+                      <%= account.active ? 'Activa' : 'Inactiva' %>
+                    </span>
+                  </div>
+
+                  <dl class="mf-account-card__meta">
+                    <dt>Moneda</dt>
+                    <dd><%= account.currency %></dd>
+                    <dt>Saldo inicial</dt>
+                    <dd
+                      data-currency-value="<%= account.initialBalance %>"
+                      data-currency="<%= account.currency %>"
+                    ></dd>
+                    <dt>Movimientos</dt>
+                    <dd><%= account.transactionCount %></dd>
+                  </dl>
+
+                  <% if (householdPermissions.includes('accounts:manage')) { %>
+                    <div class="mf-account-card__actions">
+                      <a
+                        class="mf-small-button mf-small-button--primary"
+                        href="/accounts/<%= account.id %>/edit"
+                      >
+                        Editar
+                      </a>
+                      <form method="post" action="/accounts/<%= account.id %>/status">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                        <input
+                          type="hidden"
+                          name="active"
+                          value="<%= account.active ? 'false' : 'true' %>"
+                        />
+                        <button class="mf-small-button" type="submit">
+                          <%= account.active ? 'Desactivar' : 'Activar' %>
+                        </button>
+                      </form>
+                    </div>
+                  <% } %>
+                </article>
+              <% }) %>
+            </section>
+          <% } else { %>
+            <section class="mf-empty-state">
+              <h2 class="h5">Aún no hay cuentas</h2>
+              <p class="mb-0">Crea la primera cuenta para comenzar a registrar movimientos.</p>
+            </section>
+          <% } %>
+        </div>
+      </main>
+    </div>
   </body>
 </html>

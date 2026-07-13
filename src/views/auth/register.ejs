@@ -1,101 +1,120 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+  <body class="mf-auth-body">
     <%- include('../partials/navbar') %>
 
-    <main class="container py-5 flex-grow-1">
-      <section class="card border-0 shadow-sm mx-auto" style="max-width: 34rem">
-        <div class="card-body p-4 p-md-5">
-          <h1 class="h2 mb-3">Crear cuenta</h1>
-          <p class="text-body-secondary">Comienza a organizar tus finanzas personales.</p>
-
-          <% if (formError) { %>
-            <div class="alert alert-danger" role="alert"><%= formError %></div>
-          <% } %>
-
-          <form method="post" action="/auth/register" novalidate>
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-
-            <div class="mb-3">
-              <label class="form-label" for="name">Nombre</label>
-              <input
-                class="form-control <%= fieldErrors.name ? 'is-invalid' : '' %>"
-                id="name"
-                name="name"
-                type="text"
-                minlength="2"
-                maxlength="100"
-                autocomplete="name"
-                value="<%= values.name %>"
-                required
-              />
-              <% if (fieldErrors.name) { %>
-                <div class="invalid-feedback"><%= fieldErrors.name %></div>
-              <% } %>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label" for="email">Correo electrónico</label>
-              <input
-                class="form-control <%= fieldErrors.email ? 'is-invalid' : '' %>"
-                id="email"
-                name="email"
-                type="email"
-                maxlength="254"
-                autocomplete="email"
-                value="<%= values.email %>"
-                required
-              />
-              <% if (fieldErrors.email) { %>
-                <div class="invalid-feedback"><%= fieldErrors.email %></div>
-              <% } %>
-            </div>
-
-            <div class="mb-3">
-              <label class="form-label" for="password">Contraseña</label>
-              <input
-                class="form-control <%= fieldErrors.password ? 'is-invalid' : '' %>"
-                id="password"
-                name="password"
-                type="password"
-                minlength="12"
-                maxlength="128"
-                autocomplete="new-password"
-                aria-describedby="passwordHelp"
-                required
-              />
-              <div class="form-text" id="passwordHelp">Usa al menos 12 caracteres.</div>
-              <% if (fieldErrors.password) { %>
-                <div class="invalid-feedback"><%= fieldErrors.password %></div>
-              <% } %>
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label" for="passwordConfirmation">Confirmar contraseña</label>
-              <input
-                class="form-control <%= fieldErrors.passwordConfirmation ? 'is-invalid' : '' %>"
-                id="passwordConfirmation"
-                name="passwordConfirmation"
-                type="password"
-                minlength="12"
-                maxlength="128"
-                autocomplete="new-password"
-                required
-              />
-              <% if (fieldErrors.passwordConfirmation) { %>
-                <div class="invalid-feedback"><%= fieldErrors.passwordConfirmation %></div>
-              <% } %>
-            </div>
-
-            <button class="btn btn-primary w-100" type="submit">Crear cuenta</button>
-          </form>
-
-          <p class="text-center text-body-secondary mt-4 mb-0">
-            ¿Ya tienes una cuenta? <a href="/auth/login">Iniciar sesión</a>
+    <main class="mf-auth-main">
+      <div class="mf-auth-layout">
+        <section class="mf-auth-intro" aria-labelledby="registerIntroTitle">
+          <span class="mf-auth-intro__eyebrow">Comienza a organizarte</span>
+          <h1 id="registerIntroTitle">Construye una visión clara de tu dinero.</h1>
+          <p>
+            Crea tu cuenta y configura un espacio financiero para administrar cuentas,
+            categorías y presupuestos desde un mismo lugar.
           </p>
-        </div>
-      </section>
+          <ul class="mf-auth-features">
+            <li>Espacios personales o compartidos</li>
+            <li>Control de acceso basado en roles</li>
+            <li>Protección mediante MFA y códigos de recuperación</li>
+          </ul>
+        </section>
+
+        <section class="mf-auth-card" aria-labelledby="registerTitle">
+          <div class="mf-auth-card__body">
+            <span class="mf-auth-card__badge">Nueva cuenta</span>
+            <h1 id="registerTitle">Crear cuenta</h1>
+            <p class="mf-auth-card__subtitle">
+              Completa tus datos para comenzar a organizar tus finanzas.
+            </p>
+
+            <% if (formError) { %>
+              <div class="mf-auth-alert" role="alert"><%= formError %></div>
+            <% } %>
+
+            <form class="mf-auth-form" method="post" action="/auth/register" novalidate>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+              <div class="mf-auth-field">
+                <label for="name">Nombre</label>
+                <input
+                  class="mf-auth-input <%= fieldErrors.name ? 'is-invalid' : '' %>"
+                  id="name"
+                  name="name"
+                  type="text"
+                  minlength="2"
+                  maxlength="100"
+                  autocomplete="name"
+                  value="<%= values.name %>"
+                  required
+                />
+                <% if (fieldErrors.name) { %>
+                  <p class="mf-auth-error"><%= fieldErrors.name %></p>
+                <% } %>
+              </div>
+
+              <div class="mf-auth-field">
+                <label for="email">Correo electrónico</label>
+                <input
+                  class="mf-auth-input <%= fieldErrors.email ? 'is-invalid' : '' %>"
+                  id="email"
+                  name="email"
+                  type="email"
+                  maxlength="254"
+                  autocomplete="email"
+                  value="<%= values.email %>"
+                  required
+                />
+                <% if (fieldErrors.email) { %>
+                  <p class="mf-auth-error"><%= fieldErrors.email %></p>
+                <% } %>
+              </div>
+
+              <div class="mf-auth-field">
+                <label for="password">Contraseña</label>
+                <input
+                  class="mf-auth-input <%= fieldErrors.password ? 'is-invalid' : '' %>"
+                  id="password"
+                  name="password"
+                  type="password"
+                  minlength="12"
+                  maxlength="128"
+                  autocomplete="new-password"
+                  aria-describedby="passwordHelp"
+                  required
+                />
+                <p class="mf-auth-help" id="passwordHelp">Usa al menos 12 caracteres.</p>
+                <% if (fieldErrors.password) { %>
+                  <p class="mf-auth-error"><%= fieldErrors.password %></p>
+                <% } %>
+              </div>
+
+              <div class="mf-auth-field">
+                <label for="passwordConfirmation">Confirmar contraseña</label>
+                <input
+                  class="mf-auth-input <%= fieldErrors.passwordConfirmation ? 'is-invalid' : '' %>"
+                  id="passwordConfirmation"
+                  name="passwordConfirmation"
+                  type="password"
+                  minlength="12"
+                  maxlength="128"
+                  autocomplete="new-password"
+                  required
+                />
+                <% if (fieldErrors.passwordConfirmation) { %>
+                  <p class="mf-auth-error"><%= fieldErrors.passwordConfirmation %></p>
+                <% } %>
+              </div>
+
+              <button class="mf-auth-submit" type="submit">Crear cuenta</button>
+            </form>
+
+            <p class="mf-auth-switch">
+              ¿Ya tienes una cuenta? <a href="/auth/login">Iniciar sesión</a>
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
 
     <%- include('../partials/footer') %>

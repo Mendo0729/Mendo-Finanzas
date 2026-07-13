@@ -1,70 +1,86 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
-    <%- include('../partials/navbar') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'household' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
 
-    <main class="container py-5 flex-grow-1">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
-            <span class="badge text-bg-primary mb-3">Contexto financiero</span>
-            <h1 class="h2">Selecciona un espacio</h1>
-            <p class="text-body-secondary mb-4">
-              Las cuentas, categorías, movimientos y presupuestos se limitarán al espacio activo.
-            </p>
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Contexto financiero',
+          headerTitle: 'Seleccionar espacio',
+          primaryAction: { href: '/households/new', label: 'Crear espacio' },
+        }) %>
 
-            <% if (households.length === 0) { %>
-              <div class="alert alert-info mb-4" role="alert">
-                Tu cuenta todavía no tiene espacios financieros asignados.
+        <div class="mf-workspace-content">
+          <div class="mf-form-shell">
+            <section class="mf-form-panel">
+              <div class="mf-form-panel__header">
+                <span class="mf-page-kicker">Contexto financiero</span>
+                <h2>Selecciona un espacio</h2>
+                <p>
+                  Las cuentas, categorías, movimientos y presupuestos se limitarán al espacio
+                  que elijas como activo.
+                </p>
               </div>
-              <p class="text-body-secondary">
-                Crea tu primer espacio para comenzar a registrar cuentas, categorías y movimientos.
-              </p>
-              <a class="btn btn-primary" href="/households/new">Crear mi primer espacio</a>
-            <% } else { %>
-              <form method="post" action="/households/select">
-                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-                <div class="vstack gap-3 mb-4">
-                  <% households.forEach((household, index) => { %>
-                    <label class="border rounded-3 p-3 d-flex gap-3 align-items-start">
-                      <input
-                        class="form-check-input mt-1"
-                        type="radio"
-                        name="householdId"
-                        value="<%= household.id %>"
-                        <%= household.id === selectedHouseholdId || (!selectedHouseholdId && index === 0) ? 'checked' : '' %>
-                        required
-                      />
-                      <span class="flex-grow-1">
-                        <span class="d-flex flex-wrap align-items-center gap-2">
-                          <strong><%= household.name %></strong>
-                          <span class="badge text-bg-light"><%= household.role.label %></span>
-                          <% if (household.id === selectedHouseholdId) { %>
-                            <span class="badge text-bg-success">Activo</span>
-                          <% } %>
-                        </span>
-                        <span class="small text-body-secondary d-block mt-1">
-                          Moneda: <%= household.currency %>
-                        </span>
-                      </span>
-                    </label>
-                  <% }) %>
+              <% if (households.length === 0) { %>
+                <div class="mf-empty-state">
+                  <h3 class="h5">Tu cuenta aún no tiene espacios financieros</h3>
+                  <p>Crea el primero para comenzar a registrar cuentas y movimientos.</p>
+                  <a class="mf-button mf-button--primary" href="/households/new">
+                    Crear mi primer espacio
+                  </a>
                 </div>
+              <% } else { %>
+                <form method="post" action="/households/select">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
 
-                <div class="d-flex flex-wrap gap-2">
-                  <button class="btn btn-primary" type="submit">Usar este espacio</button>
-                  <a class="btn btn-outline-primary" href="/households/new">Crear otro espacio</a>
-                  <a class="btn btn-outline-secondary" href="/">Volver al inicio</a>
-                </div>
-              </form>
-            <% } %>
-          </section>
+                  <div class="mf-household-list">
+                    <% households.forEach((household, index) => { %>
+                      <label class="mf-household-option">
+                        <input
+                          type="radio"
+                          name="householdId"
+                          value="<%= household.id %>"
+                          <%= household.id === selectedHouseholdId || (!selectedHouseholdId && index === 0) ? 'checked' : '' %>
+                          required
+                        />
+                        <span class="mf-household-option__content">
+                          <span class="mf-household-option__title">
+                            <strong><%= household.name %></strong>
+                            <span class="mf-badge"><%= household.role.label %></span>
+                            <% if (household.id === selectedHouseholdId) { %>
+                              <span class="mf-badge mf-badge--success">Activo</span>
+                            <% } %>
+                          </span>
+                          <span>Moneda: <%= household.currency %></span>
+                        </span>
+                      </label>
+                    <% }) %>
+                  </div>
+
+                  <div class="mf-form-actions">
+                    <button class="mf-button mf-button--primary" type="submit">
+                      Usar este espacio
+                    </button>
+                    <a class="mf-button mf-button--ghost" href="/households/new">
+                      Crear otro espacio
+                    </a>
+                    <a class="mf-button mf-button--ghost" href="/">Volver al dashboard</a>
+                  </div>
+                </form>
+              <% } %>
+            </section>
+          </div>
         </div>
-      </div>
-    </main>
-
-    <%- include('../partials/footer') %>
+      </main>
+    </div>
   </body>
 </html>

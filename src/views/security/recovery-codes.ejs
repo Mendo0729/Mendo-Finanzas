@@ -1,37 +1,50 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
-    <%- include('../partials/navbar') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'security' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
 
-    <main class="container py-5 flex-grow-1">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
-            <span class="badge text-bg-success mb-3">MFA habilitado</span>
-            <h1 class="h2">Guarda tus códigos de recuperación</h1>
-            <p class="text-body-secondary">
-              Cada código puede utilizarse una sola vez. Se muestran únicamente en esta pantalla.
-            </p>
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Seguridad',
+          headerTitle: 'Códigos de recuperación',
+          primaryAction: null,
+        }) %>
 
-            <div class="alert alert-warning" role="alert">
-              Guárdalos en un lugar seguro y separado del teléfono donde tienes Authenticator.
-            </div>
+        <div class="mf-workspace-content">
+          <div class="mf-form-shell">
+            <section class="mf-form-panel">
+              <div class="mf-form-panel__header">
+                <span class="mf-badge mf-badge--success">MFA habilitado</span>
+                <h2 class="mt-3">Guarda tus códigos de recuperación</h2>
+                <p>
+                  Cada código puede utilizarse una sola vez y se muestra únicamente en esta
+                  pantalla.
+                </p>
+              </div>
 
-            <div class="row g-2 mb-4">
-              <% recoveryCodes.forEach((code) => { %>
-                <div class="col-sm-6">
-                  <code class="d-block border rounded-3 p-3 text-center fs-5"><%= code %></code>
-                </div>
-              <% }) %>
-            </div>
+              <div class="mf-alert mf-alert--danger" role="alert">
+                Guárdalos en un lugar seguro y separado del teléfono donde tienes Authenticator.
+              </div>
 
-            <a class="btn btn-primary" href="/security">Finalizar</a>
-          </section>
+              <div class="mf-code-grid">
+                <% recoveryCodes.forEach((code) => { %>
+                  <code class="mf-recovery-code"><%= code %></code>
+                <% }) %>
+              </div>
+
+              <a class="mf-button mf-button--primary" href="/security">Finalizar</a>
+            </section>
+          </div>
         </div>
-      </div>
-    </main>
-
-    <%- include('../partials/footer') %>
+      </main>
+    </div>
   </body>
 </html>

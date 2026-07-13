@@ -1,63 +1,82 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+  <body class="mf-auth-body">
     <%- include('../partials/navbar') %>
 
-    <main class="container py-5 flex-grow-1">
-      <section class="card border-0 shadow-sm mx-auto" style="max-width: 32rem">
-        <div class="card-body p-4 p-md-5">
-          <h1 class="h2 mb-3">Iniciar sesión</h1>
-          <p class="text-body-secondary">Accede a tu espacio financiero.</p>
-
-          <% if (formError) { %>
-            <div class="alert alert-danger" role="alert"><%= formError %></div>
-          <% } %>
-
-          <form method="post" action="/auth/login" novalidate>
-            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-
-            <div class="mb-3">
-              <label class="form-label" for="email">Correo electrónico</label>
-              <input
-                class="form-control <%= fieldErrors.email ? 'is-invalid' : '' %>"
-                id="email"
-                name="email"
-                type="email"
-                maxlength="254"
-                autocomplete="email"
-                value="<%= values.email %>"
-                required
-              />
-              <% if (fieldErrors.email) { %>
-                <div class="invalid-feedback"><%= fieldErrors.email %></div>
-              <% } %>
-            </div>
-
-            <div class="mb-4">
-              <label class="form-label" for="password">Contraseña</label>
-              <input
-                class="form-control <%= fieldErrors.password ? 'is-invalid' : '' %>"
-                id="password"
-                name="password"
-                type="password"
-                maxlength="128"
-                autocomplete="current-password"
-                required
-              />
-              <% if (fieldErrors.password) { %>
-                <div class="invalid-feedback"><%= fieldErrors.password %></div>
-              <% } %>
-            </div>
-
-            <button class="btn btn-primary w-100" type="submit">Iniciar sesión</button>
-          </form>
-
-          <p class="text-center text-body-secondary mt-4 mb-0">
-            ¿No tienes una cuenta? <a href="/auth/register">Crear cuenta</a>
+    <main class="mf-auth-main">
+      <div class="mf-auth-layout">
+        <section class="mf-auth-intro" aria-labelledby="loginIntroTitle">
+          <span class="mf-auth-intro__eyebrow">Control financiero claro y seguro</span>
+          <h1 id="loginIntroTitle">Tus finanzas, en un solo lugar.</h1>
+          <p>
+            Consulta cuentas, categorías y presupuestos desde una experiencia diseñada para
+            ayudarte a tomar mejores decisiones.
           </p>
-        </div>
-      </section>
+          <ul class="mf-auth-features">
+            <li>Información organizada por espacio financiero</li>
+            <li>Acceso protegido con autenticación en dos pasos</li>
+            <li>Resumen visual para entender tus números rápidamente</li>
+          </ul>
+        </section>
+
+        <section class="mf-auth-card" aria-labelledby="loginTitle">
+          <div class="mf-auth-card__body">
+            <span class="mf-auth-card__badge">Acceso seguro</span>
+            <h1 id="loginTitle">Iniciar sesión</h1>
+            <p class="mf-auth-card__subtitle">
+              Accede a tu espacio financiero y continúa donde lo dejaste.
+            </p>
+
+            <% if (formError) { %>
+              <div class="mf-auth-alert" role="alert"><%= formError %></div>
+            <% } %>
+
+            <form class="mf-auth-form" method="post" action="/auth/login" novalidate>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+              <div class="mf-auth-field">
+                <label for="email">Correo electrónico</label>
+                <input
+                  class="mf-auth-input <%= fieldErrors.email ? 'is-invalid' : '' %>"
+                  id="email"
+                  name="email"
+                  type="email"
+                  maxlength="254"
+                  autocomplete="email"
+                  value="<%= values.email %>"
+                  required
+                />
+                <% if (fieldErrors.email) { %>
+                  <p class="mf-auth-error"><%= fieldErrors.email %></p>
+                <% } %>
+              </div>
+
+              <div class="mf-auth-field">
+                <label for="password">Contraseña</label>
+                <input
+                  class="mf-auth-input <%= fieldErrors.password ? 'is-invalid' : '' %>"
+                  id="password"
+                  name="password"
+                  type="password"
+                  maxlength="128"
+                  autocomplete="current-password"
+                  required
+                />
+                <% if (fieldErrors.password) { %>
+                  <p class="mf-auth-error"><%= fieldErrors.password %></p>
+                <% } %>
+              </div>
+
+              <button class="mf-auth-submit" type="submit">Iniciar sesión</button>
+            </form>
+
+            <p class="mf-auth-switch">
+              ¿No tienes una cuenta? <a href="/auth/register">Crear cuenta</a>
+            </p>
+          </div>
+        </section>
+      </div>
     </main>
 
     <%- include('../partials/footer') %>
