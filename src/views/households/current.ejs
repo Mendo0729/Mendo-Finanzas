@@ -1,62 +1,74 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
-    <%- include('../partials/navbar') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'household' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
 
-    <main class="container py-5 flex-grow-1">
-      <div class="row g-4">
-        <div class="col-lg-5">
-          <section class="rounded-4 bg-white p-4 shadow-sm h-100">
-            <span class="badge text-bg-success mb-3">Espacio activo</span>
-            <h1 class="h2"><%= household.name %></h1>
-            <p class="text-body-secondary">
-              Este contexto se aplicará a todas las consultas financieras protegidas.
-            </p>
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Contexto financiero',
+          headerTitle: household.name,
+          primaryAction: householdPermissions.includes('household:update')
+            ? { href: `/households/${household.id}/edit`, label: 'Editar espacio' }
+            : null,
+        }) %>
 
-            <dl class="row mb-4">
-              <dt class="col-sm-5">Moneda</dt>
-              <dd class="col-sm-7"><%= household.currency %></dd>
+        <div class="mf-workspace-content">
+          <section class="mf-household-grid">
+            <article class="mf-page-card mf-household-summary">
+              <span class="mf-badge mf-badge--success">Espacio activo</span>
+              <h2><%= household.name %></h2>
+              <p>Este contexto se aplicará a todas las consultas financieras protegidas.</p>
 
-              <dt class="col-sm-5">Rol</dt>
-              <dd class="col-sm-7"><span class="badge text-bg-primary"><%= role.label %></span></dd>
+              <dl class="mf-household-details">
+                <dt>Moneda</dt>
+                <dd><%= household.currency %></dd>
+                <dt>Rol</dt>
+                <dd><span class="mf-badge"><%= role.label %></span></dd>
+                <dt>Miembro desde</dt>
+                <dd><%= joinedAt.toLocaleDateString('es-PA') %></dd>
+              </dl>
 
-              <dt class="col-sm-5">Miembro desde</dt>
-              <dd class="col-sm-7"><%= joinedAt.toLocaleDateString('es-PA') %></dd>
-            </dl>
-
-            <div class="d-flex flex-wrap gap-2">
-              <a class="btn btn-primary" href="/households/select">Cambiar espacio</a>
-              <% if (householdPermissions.includes('household:update')) { %>
-                <a class="btn btn-outline-primary" href="/households/<%= household.id %>/edit">
-                  Editar espacio
+              <div class="mf-form-actions">
+                <a class="mf-button mf-button--primary" href="/households/select">
+                  Cambiar espacio
                 </a>
-              <% } %>
-              <a class="btn btn-outline-secondary" href="/">Volver al inicio</a>
-            </div>
+                <% if (householdPermissions.includes('household:update')) { %>
+                  <a
+                    class="mf-button mf-button--ghost"
+                    href="/households/<%= household.id %>/edit"
+                  >
+                    Editar espacio
+                  </a>
+                <% } %>
+                <a class="mf-button mf-button--ghost" href="/">Volver al dashboard</a>
+              </div>
+            </article>
+
+            <article class="mf-page-card mf-permissions-card">
+              <span class="mf-page-kicker">Acceso actual</span>
+              <h2>Permisos efectivos</h2>
+              <p>Los permisos se calculan desde tu rol actual en cada solicitud.</p>
+
+              <ul class="mf-permission-list">
+                <% permissions.forEach((permission) => { %>
+                  <li>
+                    <span><%= permission.label %></span>
+                    <code><%= permission.key %></code>
+                  </li>
+                <% }) %>
+              </ul>
+            </article>
           </section>
         </div>
-
-        <div class="col-lg-7">
-          <section class="rounded-4 bg-white p-4 shadow-sm h-100">
-            <h2 class="h4">Permisos efectivos</h2>
-            <p class="text-body-secondary">
-              Los permisos se calculan desde tu rol actual en cada solicitud.
-            </p>
-
-            <ul class="list-group list-group-flush">
-              <% permissions.forEach((permission) => { %>
-                <li class="list-group-item px-0 d-flex justify-content-between gap-3">
-                  <span><%= permission.label %></span>
-                  <code><%= permission.key %></code>
-                </li>
-              <% }) %>
-            </ul>
-          </section>
-        </div>
-      </div>
-    </main>
-
-    <%- include('../partials/footer') %>
+      </main>
+    </div>
   </body>
 </html>
