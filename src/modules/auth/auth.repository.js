@@ -3,7 +3,10 @@ import { prisma } from '../../config/database.js';
 const USER_STATUS_ACTIVE = 1;
 
 export function findUserByEmail(email, client = prisma) {
-  return client.user.findUnique({ where: { email } });
+  return client.user.findUnique({
+    where: { email },
+    include: { mfa: true },
+  });
 }
 
 export function findActiveUserById(userId, client = prisma) {
