@@ -1,56 +1,136 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
-    <%- include('../partials/navbar') %>
-    <main class="container py-5 flex-grow-1">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <section class="bg-white rounded-4 shadow-sm p-4 p-md-5">
-            <h1 class="h2 mb-4"><%= pageTitle %></h1>
-            <form method="post" action="<%= action %>" class="row g-3">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-              <div class="col-md-8">
-                <label class="form-label" for="name">Nombre</label>
-                <input class="form-control" id="name" name="name" maxlength="100" required value="<%= values.name %>" />
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'accounts' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
+
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Cuentas',
+          headerTitle: pageTitle,
+          primaryAction: null,
+        }) %>
+
+        <div class="mf-workspace-content">
+          <div class="mf-form-shell">
+            <section class="mf-form-panel">
+              <div class="mf-form-panel__header">
+                <span class="mf-page-kicker">Cuenta financiera</span>
+                <h2><%= pageTitle %></h2>
+                <p>
+                  Define los datos principales de la cuenta. Los campos de crédito son opcionales
+                  y solo aplican cuando corresponda.
+                </p>
               </div>
-              <div class="col-md-4">
-                <label class="form-label" for="currency">Moneda</label>
-                <input class="form-control text-uppercase" id="currency" name="currency" maxlength="3" required value="<%= values.currency %>" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="accountType">Tipo</label>
-                <select class="form-select" id="accountType" name="accountType" required>
-                  <% accountTypes.forEach((type) => { %>
-                    <option value="<%= type.value %>" <%= Number(values.accountType) === type.value ? 'selected' : '' %>><%= type.label %></option>
-                  <% }) %>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="initialBalance">Saldo inicial</label>
-                <input class="form-control" id="initialBalance" name="initialBalance" inputmode="decimal" required value="<%= values.initialBalance %>" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label" for="creditLimit">Límite de crédito</label>
-                <input class="form-control" id="creditLimit" name="creditLimit" inputmode="decimal" value="<%= values.creditLimit %>" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label" for="closingDay">Día de corte</label>
-                <input class="form-control" id="closingDay" name="closingDay" type="number" min="1" max="31" value="<%= values.closingDay %>" />
-              </div>
-              <div class="col-md-4">
-                <label class="form-label" for="paymentDay">Día de pago</label>
-                <input class="form-control" id="paymentDay" name="paymentDay" type="number" min="1" max="31" value="<%= values.paymentDay %>" />
-              </div>
-              <div class="col-12 d-flex gap-2 mt-4">
-                <button class="btn btn-primary" type="submit">Guardar</button>
-                <a class="btn btn-outline-secondary" href="/accounts">Cancelar</a>
-              </div>
-            </form>
-          </section>
+
+              <form method="post" action="<%= action %>">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+                <div class="mf-form-grid">
+                  <div class="mf-form-field mf-form-field--8">
+                    <label for="name">Nombre</label>
+                    <input
+                      class="mf-input"
+                      id="name"
+                      name="name"
+                      maxlength="100"
+                      required
+                      value="<%= values.name %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--4">
+                    <label for="currency">Moneda</label>
+                    <input
+                      class="mf-input text-uppercase"
+                      id="currency"
+                      name="currency"
+                      maxlength="3"
+                      required
+                      value="<%= values.currency %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--6">
+                    <label for="accountType">Tipo de cuenta</label>
+                    <select class="mf-select" id="accountType" name="accountType" required>
+                      <% accountTypes.forEach((type) => { %>
+                        <option
+                          value="<%= type.value %>"
+                          <%= Number(values.accountType) === type.value ? 'selected' : '' %>
+                        >
+                          <%= type.label %>
+                        </option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--6">
+                    <label for="initialBalance">Saldo inicial</label>
+                    <input
+                      class="mf-input"
+                      id="initialBalance"
+                      name="initialBalance"
+                      inputmode="decimal"
+                      required
+                      value="<%= values.initialBalance %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--4">
+                    <label for="creditLimit">Límite de crédito</label>
+                    <input
+                      class="mf-input"
+                      id="creditLimit"
+                      name="creditLimit"
+                      inputmode="decimal"
+                      value="<%= values.creditLimit %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--4">
+                    <label for="closingDay">Día de corte</label>
+                    <input
+                      class="mf-input"
+                      id="closingDay"
+                      name="closingDay"
+                      type="number"
+                      min="1"
+                      max="31"
+                      value="<%= values.closingDay %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--4">
+                    <label for="paymentDay">Día de pago</label>
+                    <input
+                      class="mf-input"
+                      id="paymentDay"
+                      name="paymentDay"
+                      type="number"
+                      min="1"
+                      max="31"
+                      value="<%= values.paymentDay %>"
+                    />
+                  </div>
+                </div>
+
+                <div class="mf-form-actions">
+                  <button class="mf-button mf-button--primary" type="submit">Guardar cuenta</button>
+                  <a class="mf-button mf-button--ghost" href="/accounts">Cancelar</a>
+                </div>
+              </form>
+            </section>
+          </div>
         </div>
-      </div>
-    </main>
-    <%- include('../partials/footer') %>
+      </main>
+    </div>
   </body>
 </html>
