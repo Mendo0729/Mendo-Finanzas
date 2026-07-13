@@ -5,6 +5,7 @@ import { healthRouter } from '../modules/health/health.routes.js';
 import { homeRouter } from '../modules/home/home.routes.js';
 import { householdRouter } from '../modules/households/household.routes.js';
 import { securityRouter } from '../modules/security/security.routes.js';
+import { transactionRouter } from '../modules/transactions/transaction.routes.js';
 
 export function registerRoutes(app) {
   app.use('/', homeRouter);
@@ -12,6 +13,7 @@ export function registerRoutes(app) {
   app.use('/households', householdRouter);
   app.use('/accounts', accountRouter);
   app.use('/categories', categoryRouter);
+  app.use('/transactions', transactionRouter);
   app.use('/security', securityRouter);
   app.use('/health', healthRouter);
 }

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'transactions' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
+
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Finanzas',
+          headerTitle: 'Movimientos',
+          primaryAction: householdPermissions.includes('transactions:manage')
+            ? { href: '/transactions/new', label: 'Nuevo movimiento' }
+            : null,
+        }) %>
+
+        <div class="mf-workspace-content">
+          <div class="mf-page-intro">
+            <div>
+              <span class="mf-page-kicker">Espacio financiero</span>
+              <h2>Ingresos y gastos</h2>
+              <p>Consulta los movimientos registrados en el espacio activo.</p>
+            </div>
+          </div>
+
+          <% if (transactions.length > 0) { %>
+            <section class="mf-account-grid" aria-label="Listado de movimientos">
+              <% transactions.forEach((transaction) => { %>
+                <article class="mf-account-card">
+                  <div class="mf-account-card__head">
+                    <div>
+                      <h3><%= transaction.description %></h3>
+                      <p><%= transaction.transactionDateLabel %></p>
+                    </div>
+                    <span
+                      class="mf-badge <%= transaction.transactionType === 1 ? 'mf-badge--success' : 'mf-badge--danger' %>"
+                    >
+                      <%= transaction.transactionTypeLabel %>
+                    </span>
+                  </div>
+
+                  <dl class="mf-account-card__meta">
+                    <dt>Monto</dt>
+                    <dd
+                      data-currency-value="<%= transaction.transactionType === 1 ? transaction.amount : `-${transaction.amount}` %>"
+                      data-currency="<%= transaction.account.currency %>"
+                    ></dd>
+                    <dt>Cuenta</dt>
+                    <dd><%= transaction.account.name %></dd>
+                    <dt>Categoría</dt>
+                    <dd><%= transaction.category?.name ?? 'Sin categoría' %></dd>
+                  </dl>
+
+                  <% if (transaction.notes) { %>
+                    <p class="mb-0"><%= transaction.notes %></p>
+                  <% } %>
+                </article>
+              <% }) %>
+            </section>
+          <% } else { %>
+            <section class="mf-empty-state">
+              <h2 class="h5">Aún no hay movimientos</h2>
+              <p class="mb-0">Registra un ingreso o gasto para comenzar a construir tu historial.</p>
+            </section>
+          <% } %>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

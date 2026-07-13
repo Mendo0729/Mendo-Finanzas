@@ -28,6 +28,16 @@
       </a>
     <% } %>
 
+    <% if (householdPermissions.includes('transactions:view')) { %>
+      <a
+        class="mf-nav-link <%= activeSection === 'transactions' ? 'is-active' : '' %>"
+        href="/transactions"
+        <%- activeSection === 'transactions' ? 'aria-current="page"' : '' %>
+      >
+        <span aria-hidden="true">↕</span> Movimientos
+      </a>
+    <% } %>
+
     <% if (householdPermissions.includes('categories:view')) { %>
       <a
         class="mf-nav-link <%= activeSection === 'categories' ? 'is-active' : '' %>"

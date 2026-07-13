@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'transactions' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
+
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Movimientos',
+          headerTitle: pageTitle,
+          primaryAction: null,
+        }) %>
+
+        <div class="mf-workspace-content">
+          <div class="mf-form-shell">
+            <section class="mf-form-panel">
+              <div class="mf-form-panel__header">
+                <span class="mf-page-kicker">Ingreso o gasto</span>
+                <h2><%= pageTitle %></h2>
+                <p>
+                  Selecciona una cuenta y una categoría del espacio activo. El monto siempre debe ser
+                  mayor que cero.
+                </p>
+              </div>
+
+              <% if (accounts.length === 0 || categories.length === 0) { %>
+                <section class="mf-empty-state">
+                  <h3 class="h5">Faltan datos para registrar movimientos</h3>
+                  <p>
+                    Debes tener al menos una cuenta activa y una categoría activa antes de continuar.
+                  </p>
+                  <div class="mf-form-actions">
+                    <% if (accounts.length === 0) { %>
+                      <a class="mf-button mf-button--primary" href="/accounts/new">Crear cuenta</a>
+                    <% } %>
+                    <% if (categories.length === 0) { %>
+                      <a class="mf-button mf-button--primary" href="/categories/new"
+                        >Crear categoría</a
+                      >
+                    <% } %>
+                    <a class="mf-button mf-button--ghost" href="/transactions">Volver</a>
+                  </div>
+                </section>
+              <% } else { %>
+                <form method="post" action="/transactions">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+                  <div class="mf-form-grid">
+                    <div class="mf-form-field mf-form-field--6">
+                      <label for="transactionType">Tipo de movimiento</label>
+                      <select
+                        class="mf-select"
+                        id="transactionType"
+                        name="transactionType"
+                        required
+                      >
+                        <% transactionTypes.forEach((type) => { %>
+                          <option
+                            value="<%= type.value %>"
+                            <%= Number(values.transactionType) === type.value ? 'selected' : '' %>
+                          >
+                            <%= type.label %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+
+                    <div class="mf-form-field mf-form-field--6">
+                      <label for="transactionDate">Fecha</label>
+                      <input
+                        class="mf-input"
+                        id="transactionDate"
+                        name="transactionDate"
+                        type="date"
+                        required
+                        value="<%= values.transactionDate %>"
+                      />
+                    </div>
+
+                    <div class="mf-form-field mf-form-field--6">
+                      <label for="accountId">Cuenta</label>
+                      <select class="mf-select" id="accountId" name="accountId" required>
+                        <option value="">Selecciona una cuenta</option>
+                        <% accounts.forEach((account) => { %>
+                          <option value="<%= account.id %>">
+                            <%= account.name %> · <%= account.currency %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+
+                    <div class="mf-form-field mf-form-field--6">
+                      <label for="categoryId">Categoría</label>
+                      <select class="mf-select" id="categoryId" name="categoryId" required>
+                        <option value="">Selecciona una categoría</option>
+                        <% categories.forEach((category) => { %>
+                          <option value="<%= category.id %>">
+                            <%= category.categoryType === 1 ? 'Ingreso' : 'Gasto' %> · <%=
+                            category.name %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+
+                    <div class="mf-form-field mf-form-field--8">
+                      <label for="description">Descripción</label>
+                      <input
+                        class="mf-input"
+                        id="description"
+                        name="description"
+                        maxlength="160"
+                        required
+                        value="<%= values.description %>"
+                      />
+                    </div>
+
+                    <div class="mf-form-field mf-form-field--4">
+                      <label for="amount">Monto</label>
+                      <input
+                        class="mf-input"
+                        id="amount"
+                        name="amount"
+                        inputmode="decimal"
+                        required
+                        value="<%= values.amount %>"
+                      />
+                    </div>
+
+                    <div class="mf-form-field mf-form-field--12">
+                      <label for="notes">Notas</label>
+                      <textarea
+                        class="mf-input"
+                        id="notes"
+                        name="notes"
+                        maxlength="1000"
+                        rows="4"
+                      ><%= values.notes %></textarea>
+                    </div>
+                  </div>
+
+                  <div class="mf-form-actions">
+                    <button class="mf-button mf-button--primary" type="submit">
+                      Guardar movimiento
+                    </button>
+                    <a class="mf-button mf-button--ghost" href="/transactions">Cancelar</a>
+                  </div>
+                </form>
+              <% } %>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
