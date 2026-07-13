@@ -36,8 +36,8 @@
                   name="month"
                   value="<%= month %>"
                   aria-label="Seleccionar mes"
-                  onchange="this.form.submit()"
                 />
+                <button class="mf-small-button" type="submit">Ir</button>
               </form>
               <a class="mf-small-button" href="/budgets?month=<%= nextMonth %>">Mes siguiente</a>
             </div>
@@ -146,7 +146,7 @@
                       </td>
                       <td>
                         <span
-                          class="mf-badge <%= budget.progressState === 'normal' ? 'mf-badge--success' : budget.progressState === 'exceeded' ? 'mf-badge--danger' : '' %>"
+                          class="mf-badge <%= budget.active && budget.progressState === 'normal' ? 'mf-badge--success' : budget.active && budget.progressState === 'exceeded' ? 'mf-badge--danger' : '' %>"
                         >
                           <%= budget.active ? budget.progressLabel : 'Inactivo' %>
                         </span>
