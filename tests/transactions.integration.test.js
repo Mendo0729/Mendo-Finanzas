@@ -220,7 +220,16 @@ test('el listado excluye movimientos anulados y otros espacios', async () => {
   });
 
   const transactions = await transactionService.listTransactions(householdA.id);
-  assert.equal(transactions.some(({ description }) => description === 'Movimiento anulado'), false);
-  assert.equal(transactions.some(({ description }) => description === 'Movimiento externo'), false);
-  assert.equal(transactions.some(({ description }) => description === 'Compra de prueba'), true);
+  assert.equal(
+    transactions.some(({ description }) => description === 'Movimiento anulado'),
+    false,
+  );
+  assert.equal(
+    transactions.some(({ description }) => description === 'Movimiento externo'),
+    false,
+  );
+  assert.equal(
+    transactions.some(({ description }) => description === 'Compra de prueba'),
+    true,
+  );
 });
