@@ -164,6 +164,7 @@ model Budget {
   categoryId  BigInt   @map("category_id")
   monthStart  DateTime @map("month_start") @db.Date
   amount      Decimal  @db.Decimal(14, 2)
+  active      Boolean  @default(true)
   createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -172,6 +173,7 @@ model Budget {
 
   @@unique([householdId, categoryId, monthStart])
   @@index([householdId, monthStart])
+  @@index([householdId, monthStart, active])
   @@map("budgets")
 }
 
