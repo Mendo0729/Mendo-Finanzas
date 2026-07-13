@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { transactionBodySchema } from '../../src/modules/transactions/transaction.schemas.js';
+import {
+  transactionBodySchema,
+  transactionIdSchema,
+} from '../../src/modules/transactions/transaction.schemas.js';
 
 function validBody(overrides = {}) {
   return {
@@ -25,6 +28,17 @@ test('normaliza una transacción válida sin aceptar householdId del navegador',
   assert.equal(parsed.amount, '125.50');
   assert.equal(parsed.transactionDate.toISOString(), '2026-07-13T00:00:00.000Z');
   assert.equal('householdId' in parsed, false);
+});
+
+test('normaliza un identificador de movimiento válido', () => {
+  assert.deepEqual(transactionIdSchema.parse({ transactionId: '42' }), { transactionId: 42n });
+});
+
+test('rechaza identificadores de movimiento inválidos', () => {
+  assert.throws(
+    () => transactionIdSchema.parse({ transactionId: 'otro-espacio' }),
+    (error) => error.issues?.[0]?.path?.[0] === 'transactionId',
+  );
 });
 
 test('rechaza montos iguales a cero', () => {
