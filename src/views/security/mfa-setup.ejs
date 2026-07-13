@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+    <%- include('../partials/navbar') %>
+
+    <main class="container py-5 flex-grow-1">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
+            <span class="badge text-bg-primary mb-3">MFA</span>
+            <h1 class="h2">Configurar Authenticator</h1>
+            <p class="text-body-secondary">
+              Agrega una cuenta manualmente en Google Authenticator o Microsoft Authenticator.
+            </p>
+
+            <ol class="mb-4">
+              <li>Abre tu aplicación de autenticación.</li>
+              <li>Selecciona agregar una cuenta mediante clave de configuración.</li>
+              <li>Usa el nombre <strong>Mendo Finanzas</strong> y la clave siguiente.</li>
+            </ol>
+
+            <div class="alert alert-light border">
+              <div class="small text-body-secondary mb-1">Clave de configuración</div>
+              <code class="fs-5 text-break"><%= setup.secret %></code>
+            </div>
+
+            <form method="post" action="/security/mfa/setup/confirm" class="vstack gap-3">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+              <div>
+                <label class="form-label" for="token">Código de 6 dígitos</label>
+                <input
+                  class="form-control <%= fieldError ? 'is-invalid' : '' %>"
+                  id="token"
+                  name="token"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                  pattern="[0-9]{6}"
+                  maxlength="6"
+                  required
+                  autofocus
+                />
+                <% if (fieldError) { %>
+                  <div class="invalid-feedback"><%= fieldError %></div>
+                <% } %>
+              </div>
+
+              <div class="d-flex gap-2">
+                <button class="btn btn-primary" type="submit">Verificar y habilitar</button>
+                <a class="btn btn-outline-secondary" href="/security">Cancelar</a>
+              </div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>
