@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+    <%- include('../partials/navbar') %>
+
+    <main class="container py-5 flex-grow-1">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
+            <span class="badge text-bg-success mb-3">MFA habilitado</span>
+            <h1 class="h2">Guarda tus códigos de recuperación</h1>
+            <p class="text-body-secondary">
+              Cada código puede utilizarse una sola vez. Se muestran únicamente en esta pantalla.
+            </p>
+
+            <div class="alert alert-warning" role="alert">
+              Guárdalos en un lugar seguro y separado del teléfono donde tienes Authenticator.
+            </div>
+
+            <div class="row g-2 mb-4">
+              <% recoveryCodes.forEach((code) => { %>
+                <div class="col-sm-6">
+                  <code class="d-block border rounded-3 p-3 text-center fs-5"><%= code %></code>
+                </div>
+              <% }) %>
+            </div>
+
+            <a class="btn btn-primary" href="/security">Finalizar</a>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>
