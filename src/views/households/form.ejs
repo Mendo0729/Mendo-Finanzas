@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
+    <%- include('../partials/navbar') %>
+
+    <main class="container py-5 flex-grow-1">
+      <div class="row justify-content-center">
+        <div class="col-lg-7">
+          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
+            <span class="badge text-bg-primary mb-3">Espacio financiero</span>
+            <h1 class="h2"><%= household ? 'Editar espacio' : 'Crear espacio' %></h1>
+            <p class="text-body-secondary mb-4">
+              El nombre y la moneda se utilizarán como contexto principal para tus finanzas.
+            </p>
+
+            <form method="post" action="<%= action %>" class="vstack gap-4">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+              <div>
+                <label class="form-label" for="name">Nombre</label>
+                <input
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  type="text"
+                  maxlength="100"
+                  value="<%= values.name %>"
+                  required
+                  autofocus
+                />
+                <div class="form-text">Ejemplo: Finanzas personales, Familia o Negocio.</div>
+              </div>
+
+              <div>
+                <label class="form-label" for="currency">Moneda principal</label>
+                <select class="form-select" id="currency" name="currency" required>
+                  <% currencies.forEach((currency) => { %>
+                    <option value="<%= currency.value %>" <%= values.currency === currency.value ? 'selected' : '' %>>
+                      <%= currency.label %>
+                    </option>
+                  <% }) %>
+                </select>
+                <div class="form-text">
+                  Cambiar la moneda no convierte automáticamente importes existentes.
+                </div>
+              </div>
+
+              <% if (!household) { %>
+                <div class="alert alert-light border mb-0" role="alert">
+                  Se crearán categorías iniciales y quedarás asignado como propietario del espacio.
+                </div>
+              <% } %>
+
+              <div class="d-flex flex-wrap gap-2">
+                <button class="btn btn-primary" type="submit">
+                  <%= household ? 'Guardar cambios' : 'Crear espacio' %>
+                </button>
+                <a class="btn btn-outline-secondary" href="<%= household ? '/households/current' : '/households/select' %>">
+                  Cancelar
+                </a>
+              </div>
+            </form>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>
