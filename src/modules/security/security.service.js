@@ -31,7 +31,8 @@ function createQrSvg(otpauthUri) {
     background: '#ffffff',
     ecl: 'M',
     join: true,
-    container: 'svg-viewbox',
+    container: 'svg',
+    xmlDeclaration: false,
   }).svg();
 }
 
