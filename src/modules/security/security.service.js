@@ -18,6 +18,13 @@ function parseUserId(value) {
   }
 }
 
+function setupResponse(secret, email) {
+  return {
+    secret,
+    otpauthUri: buildOtpAuthUri({ secret, email }),
+  };
+}
+
 export async function getMfaStatus(rawUserId) {
   const userId = parseUserId(rawUserId);
   const mfa = await securityRepository.findMfaByUserId(userId);
@@ -41,11 +48,20 @@ export async function beginMfaSetup(rawUserId, email) {
 
   const secret = generateTotpSecret();
   await securityRepository.savePendingMfaSecret(userId, encryptTotpSecret(secret));
+  return setupResponse(secret, email);
+}
 
-  return {
-    secret,
-    otpauthUri: buildOtpAuthUri({ secret, email }),
-  };
+export async function getPendingMfaSetup(rawUserId, email) {
+  const userId = parseUserId(rawUserId);
+  const mfa = await securityRepository.findMfaByUserId(userId);
+
+  if (!mfa?.totpSecretEncrypted || mfa.enabled) {
+    throw new ConflictError('No existe una configuración MFA pendiente.', {
+      code: 'MFA_SETUP_NOT_PENDING',
+    });
+  }
+
+  return setupResponse(decryptTotpSecret(mfa.totpSecretEncrypted), email);
 }
 
 export async function confirmMfaSetup(rawUserId, token) {
