@@ -9,6 +9,7 @@ export const AUDIT_ENTITY_TYPES = Object.freeze({
   ACCOUNT: 1,
   CATEGORY: 2,
   HOUSEHOLD: 3,
+  TRANSACTION: 4,
 });
 
 export function buildAuditActor(request, householdId = request.context?.household?.id ?? null) {
