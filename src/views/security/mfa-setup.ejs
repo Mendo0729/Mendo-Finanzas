@@ -1,73 +1,89 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
-    <%- include('../partials/navbar') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'security' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
 
-    <main class="container py-5 flex-grow-1">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
-            <span class="badge text-bg-primary mb-3">MFA</span>
-            <h1 class="h2">Configurar Authenticator</h1>
-            <p class="text-body-secondary">
-              Escanea el código QR con Google Authenticator o Microsoft Authenticator.
-            </p>
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Seguridad',
+          headerTitle: 'Configurar MFA',
+          primaryAction: null,
+        }) %>
 
-            <div class="row g-4 align-items-center mb-4">
-              <div class="col-md-5 text-center">
-                <div class="border rounded-3 bg-white p-3 d-inline-block" aria-label="Código QR para configurar MFA">
+        <div class="mf-workspace-content">
+          <div class="mf-form-shell">
+            <section class="mf-form-panel">
+              <div class="mf-form-panel__header">
+                <span class="mf-page-kicker">Autenticación en dos pasos</span>
+                <h2>Configurar Authenticator</h2>
+                <p>
+                  Escanea el código QR con Google Authenticator, Microsoft Authenticator u otra
+                  aplicación compatible.
+                </p>
+              </div>
+
+              <div class="mf-setup-grid">
+                <div class="mf-qr-panel" aria-label="Código QR para configurar MFA">
                   <%- setup.qrSvg %>
                 </div>
-              </div>
-              <div class="col-md-7">
-                <ol class="mb-3">
-                  <li>Abre tu aplicación de autenticación.</li>
-                  <li>Selecciona la opción para escanear un código QR.</li>
-                  <li>Escanea el código mostrado y confirma con el código de 6 dígitos.</li>
-                </ol>
 
-                <details>
-                  <summary class="text-primary">No puedo escanear el QR</summary>
-                  <div class="alert alert-light border mt-3 mb-0">
-                    <div class="small text-body-secondary mb-1">Clave de configuración manual</div>
-                    <code class="fs-5 text-break"><%= setup.secret %></code>
-                  </div>
-                </details>
-              </div>
-            </div>
+                <div>
+                  <ol class="mf-setup-steps">
+                    <li>Abre tu aplicación de autenticación.</li>
+                    <li>Selecciona la opción para escanear un código QR.</li>
+                    <li>Escanea el código y confirma con el código temporal de seis dígitos.</li>
+                  </ol>
 
-            <form method="post" action="/security/mfa/setup/confirm" class="vstack gap-3">
-              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-              <div>
-                <label class="form-label" for="token">Código de 6 dígitos</label>
-                <input
-                  class="form-control <%= fieldError ? 'is-invalid' : '' %>"
-                  id="token"
-                  name="token"
-                  type="text"
-                  inputmode="numeric"
-                  autocomplete="one-time-code"
-                  pattern="[0-9]{6}"
-                  maxlength="6"
-                  required
-                  autofocus
-                />
-                <% if (fieldError) { %>
-                  <div class="invalid-feedback"><%= fieldError %></div>
-                <% } %>
+                  <details>
+                    <summary class="text-success fw-semibold">No puedo escanear el QR</summary>
+                    <div class="mf-secret-panel">
+                      <p class="mf-field-help mb-1">Clave de configuración manual</p>
+                      <code class="text-break"><%= setup.secret %></code>
+                    </div>
+                  </details>
+                </div>
               </div>
 
-              <div class="d-flex gap-2">
-                <button class="btn btn-primary" type="submit">Verificar y habilitar</button>
-                <a class="btn btn-outline-secondary" href="/security">Cancelar</a>
-              </div>
-            </form>
-          </section>
+              <form method="post" action="/security/mfa/setup/confirm" class="mt-4">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                <div class="mf-form-field">
+                  <label for="token">Código de 6 dígitos</label>
+                  <input
+                    class="mf-input text-center font-monospace <%= fieldError ? 'is-invalid' : '' %>"
+                    id="token"
+                    name="token"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    pattern="[0-9]{6}"
+                    maxlength="6"
+                    required
+                    autofocus
+                  />
+                  <% if (fieldError) { %>
+                    <p class="text-danger small mb-0"><%= fieldError %></p>
+                  <% } %>
+                </div>
+
+                <div class="mf-form-actions">
+                  <button class="mf-button mf-button--primary" type="submit">
+                    Verificar y habilitar
+                  </button>
+                  <a class="mf-button mf-button--ghost" href="/security">Cancelar</a>
+                </div>
+              </form>
+            </section>
+          </div>
         </div>
-      </div>
-    </main>
-
-    <%- include('../partials/footer') %>
+      </main>
+    </div>
   </body>
 </html>
