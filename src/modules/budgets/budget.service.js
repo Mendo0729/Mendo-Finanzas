@@ -36,11 +36,7 @@ function mapBudget(budget, spentValue = 0) {
   const progressState = getBudgetProgressState(spent, limit);
   const percentage = limit.isZero()
     ? 0
-    : spent
-        .times(100)
-        .dividedBy(limit)
-        .toDecimalPlaces(0, Prisma.Decimal.ROUND_HALF_UP)
-        .toNumber();
+    : spent.times(100).dividedBy(limit).toDecimalPlaces(0, Prisma.Decimal.ROUND_HALF_UP).toNumber();
 
   return {
     ...budget,
@@ -75,9 +71,12 @@ function throwRepositoryError(error) {
     });
   }
   if (error === 'CATEGORY_NOT_FOUND') {
-    throw new NotFoundError('La categoría seleccionada no existe o no es una categoría de gasto activa.', {
-      code: 'BUDGET_CATEGORY_NOT_FOUND',
-    });
+    throw new NotFoundError(
+      'La categoría seleccionada no existe o no es una categoría de gasto activa.',
+      {
+        code: 'BUDGET_CATEGORY_NOT_FOUND',
+      },
+    );
   }
 }
 
@@ -106,14 +105,8 @@ export async function getBudgetOverview(householdId, requestedMonth = null) {
   );
 
   const activeBudgets = mappedBudgets.filter(({ active }) => active);
-  const totalLimit = activeBudgets.reduce(
-    (total, budget) => total.plus(budget.amount),
-    decimal(0),
-  );
-  const totalSpent = activeBudgets.reduce(
-    (total, budget) => total.plus(budget.spent),
-    decimal(0),
-  );
+  const totalLimit = activeBudgets.reduce((total, budget) => total.plus(budget.amount), decimal(0));
+  const totalSpent = activeBudgets.reduce((total, budget) => total.plus(budget.spent), decimal(0));
   const totalRemaining = totalLimit.minus(totalSpent);
 
   return {
