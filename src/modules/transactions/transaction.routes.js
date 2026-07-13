@@ -13,8 +13,12 @@ import {
   createTransaction,
   listTransactions,
   showCreateTransaction,
+  showEditTransaction,
+  showTransaction,
+  updateTransaction,
+  voidTransaction,
 } from './transaction.controller.js';
-import { transactionBodySchema } from './transaction.schemas.js';
+import { transactionBodySchema, transactionIdSchema } from './transaction.schemas.js';
 
 export const transactionRouter = Router();
 
@@ -36,4 +40,30 @@ transactionRouter.post(
   verifyCsrfToken,
   validate({ body: transactionBodySchema }),
   asyncHandler(createTransaction),
+);
+transactionRouter.get(
+  '/:transactionId/edit',
+  requireHouseholdPermission(HOUSEHOLD_PERMISSIONS.TRANSACTIONS_MANAGE),
+  validate({ params: transactionIdSchema }),
+  asyncHandler(showEditTransaction),
+);
+transactionRouter.post(
+  '/:transactionId/void',
+  requireHouseholdPermission(HOUSEHOLD_PERMISSIONS.TRANSACTIONS_MANAGE),
+  verifyCsrfToken,
+  validate({ params: transactionIdSchema }),
+  asyncHandler(voidTransaction),
+);
+transactionRouter.post(
+  '/:transactionId',
+  requireHouseholdPermission(HOUSEHOLD_PERMISSIONS.TRANSACTIONS_MANAGE),
+  verifyCsrfToken,
+  validate({ params: transactionIdSchema, body: transactionBodySchema }),
+  asyncHandler(updateTransaction),
+);
+transactionRouter.get(
+  '/:transactionId',
+  requireHouseholdPermission(HOUSEHOLD_PERMISSIONS.TRANSACTIONS_VIEW),
+  validate({ params: transactionIdSchema }),
+  asyncHandler(showTransaction),
 );

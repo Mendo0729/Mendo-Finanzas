@@ -2,6 +2,8 @@ import { prisma } from '../../config/database.js';
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '../../core/audit/audit.constants.js';
 import { TRANSACTION_STATUSES, TRANSACTION_TYPES } from './transaction.constants.js';
 
+const editableTransactionTypes = [TRANSACTION_TYPES.INCOME, TRANSACTION_TYPES.EXPENSE];
+
 const transactionSelect = Object.freeze({
   id: true,
   householdId: true,
@@ -14,12 +16,67 @@ const transactionSelect = Object.freeze({
   notes: true,
   transactionDate: true,
   status: true,
+  transferGroupId: true,
   createdAt: true,
   updatedAt: true,
   deletedAt: true,
   account: { select: { name: true, currency: true } },
   category: { select: { name: true, icon: true } },
+  creator: { select: { name: true } },
 });
+
+function editableTransactionWhere(householdId, transactionId) {
+  return {
+    id: transactionId,
+    householdId,
+    status: TRANSACTION_STATUSES.CONFIRMED,
+    deletedAt: null,
+    transferGroupId: null,
+    transactionType: { in: editableTransactionTypes },
+  };
+}
+
+function auditSnapshot(transaction) {
+  return {
+    accountId: transaction.accountId.toString(),
+    accountName: transaction.account.name,
+    categoryId: transaction.categoryId?.toString() ?? null,
+    categoryName: transaction.category?.name ?? null,
+    transactionType: transaction.transactionType,
+    amount: transaction.amount.toString(),
+    currency: transaction.account.currency,
+    description: transaction.description,
+    notes: transaction.notes,
+    transactionDate: transaction.transactionDate.toISOString().slice(0, 10),
+    status: transaction.status,
+    deletedAt: transaction.deletedAt?.toISOString() ?? null,
+  };
+}
+
+async function findReferences(database, householdId, data) {
+  const account = await database.account.findFirst({
+    where: { id: data.accountId, householdId, active: true },
+    select: { id: true, name: true, currency: true },
+  });
+  if (!account) {
+    return { error: 'ACCOUNT_NOT_FOUND' };
+  }
+
+  const category = await database.category.findFirst({
+    where: {
+      id: data.categoryId,
+      householdId,
+      active: true,
+      categoryType: data.transactionType,
+    },
+    select: { id: true, name: true },
+  });
+  if (!category) {
+    return { error: 'CATEGORY_NOT_FOUND' };
+  }
+
+  return { account, category };
+}
 
 export function listTransactions(householdId) {
   return prisma.transaction.findMany({
@@ -27,11 +84,18 @@ export function listTransactions(householdId) {
       householdId,
       status: TRANSACTION_STATUSES.CONFIRMED,
       deletedAt: null,
-      transactionType: { in: [TRANSACTION_TYPES.INCOME, TRANSACTION_TYPES.EXPENSE] },
+      transactionType: { in: editableTransactionTypes },
     },
     select: transactionSelect,
     orderBy: [{ transactionDate: 'desc' }, { createdAt: 'desc' }],
     take: 100,
+  });
+}
+
+export function findTransaction(householdId, transactionId) {
+  return prisma.transaction.findFirst({
+    where: editableTransactionWhere(householdId, transactionId),
+    select: transactionSelect,
   });
 }
 
@@ -46,7 +110,7 @@ export async function listFormOptions(householdId) {
       where: {
         householdId,
         active: true,
-        categoryType: { in: [TRANSACTION_TYPES.INCOME, TRANSACTION_TYPES.EXPENSE] },
+        categoryType: { in: editableTransactionTypes },
       },
       select: { id: true, name: true, categoryType: true },
       orderBy: [{ categoryType: 'asc' }, { name: 'asc' }],
@@ -57,33 +121,17 @@ export async function listFormOptions(householdId) {
 }
 
 export function createTransaction(householdId, data, actor) {
-  return prisma.$transaction(async (transaction) => {
-    const account = await transaction.account.findFirst({
-      where: { id: data.accountId, householdId, active: true },
-      select: { id: true, name: true, currency: true },
-    });
-    if (!account) {
-      return { error: 'ACCOUNT_NOT_FOUND' };
+  return prisma.$transaction(async (database) => {
+    const references = await findReferences(database, householdId, data);
+    if (references.error) {
+      return references;
     }
 
-    const category = await transaction.category.findFirst({
-      where: {
-        id: data.categoryId,
-        householdId,
-        active: true,
-        categoryType: data.transactionType,
-      },
-      select: { id: true, name: true },
-    });
-    if (!category) {
-      return { error: 'CATEGORY_NOT_FOUND' };
-    }
-
-    const created = await transaction.transaction.create({
+    const created = await database.transaction.create({
       data: {
         householdId,
-        accountId: account.id,
-        categoryId: category.id,
+        accountId: references.account.id,
+        categoryId: references.category.id,
         createdBy: actor.userId,
         transactionType: data.transactionType,
         amount: data.amount,
@@ -95,28 +143,98 @@ export function createTransaction(householdId, data, actor) {
       select: transactionSelect,
     });
 
-    await transaction.auditLog.create({
+    await database.auditLog.create({
       data: {
         ...actor,
         action: AUDIT_ACTIONS.CREATE,
         entityType: AUDIT_ENTITY_TYPES.TRANSACTION,
         entityId: created.id,
-        metadata: {
-          after: {
-            accountId: account.id.toString(),
-            accountName: account.name,
-            categoryId: category.id.toString(),
-            categoryName: category.name,
-            transactionType: created.transactionType,
-            amount: created.amount.toString(),
-            currency: account.currency,
-            description: created.description,
-            transactionDate: created.transactionDate.toISOString().slice(0, 10),
-          },
-        },
+        metadata: { after: auditSnapshot(created) },
       },
     });
 
     return { transaction: created };
+  });
+}
+
+export function updateTransaction(householdId, transactionId, data, actor) {
+  return prisma.$transaction(async (database) => {
+    const before = await database.transaction.findFirst({
+      where: editableTransactionWhere(householdId, transactionId),
+      select: transactionSelect,
+    });
+    if (!before) {
+      return { error: 'TRANSACTION_NOT_FOUND' };
+    }
+
+    const references = await findReferences(database, householdId, data);
+    if (references.error) {
+      return references;
+    }
+
+    const updated = await database.transaction.update({
+      where: { id: before.id },
+      data: {
+        accountId: references.account.id,
+        categoryId: references.category.id,
+        transactionType: data.transactionType,
+        amount: data.amount,
+        description: data.description,
+        notes: data.notes,
+        transactionDate: data.transactionDate,
+      },
+      select: transactionSelect,
+    });
+
+    await database.auditLog.create({
+      data: {
+        ...actor,
+        action: AUDIT_ACTIONS.UPDATE,
+        entityType: AUDIT_ENTITY_TYPES.TRANSACTION,
+        entityId: updated.id,
+        metadata: {
+          before: auditSnapshot(before),
+          after: auditSnapshot(updated),
+        },
+      },
+    });
+
+    return { transaction: updated };
+  });
+}
+
+export function voidTransaction(householdId, transactionId, actor) {
+  return prisma.$transaction(async (database) => {
+    const before = await database.transaction.findFirst({
+      where: editableTransactionWhere(householdId, transactionId),
+      select: transactionSelect,
+    });
+    if (!before) {
+      return { error: 'TRANSACTION_NOT_FOUND' };
+    }
+
+    const updated = await database.transaction.update({
+      where: { id: before.id },
+      data: {
+        status: TRANSACTION_STATUSES.VOIDED,
+        deletedAt: new Date(),
+      },
+      select: transactionSelect,
+    });
+
+    await database.auditLog.create({
+      data: {
+        ...actor,
+        action: AUDIT_ACTIONS.VOID,
+        entityType: AUDIT_ENTITY_TYPES.TRANSACTION,
+        entityId: updated.id,
+        metadata: {
+          before: auditSnapshot(before),
+          after: auditSnapshot(updated),
+        },
+      },
+    });
+
+    return { transaction: updated };
   });
 }

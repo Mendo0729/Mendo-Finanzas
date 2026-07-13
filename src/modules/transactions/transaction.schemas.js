@@ -81,3 +81,9 @@ export const transactionBodySchema = Object.freeze({
     };
   },
 });
+
+export const transactionIdSchema = Object.freeze({
+  parse(value) {
+    return { transactionId: bigint(value?.transactionId, 'transactionId') };
+  },
+});

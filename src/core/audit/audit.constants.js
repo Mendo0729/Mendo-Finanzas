@@ -3,6 +3,7 @@ export const AUDIT_ACTIONS = Object.freeze({
   UPDATE: 2,
   ACTIVATE: 3,
   DEACTIVATE: 4,
+  VOID: 5,
 });
 
 export const AUDIT_ENTITY_TYPES = Object.freeze({
