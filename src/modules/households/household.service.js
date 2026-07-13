@@ -1,4 +1,6 @@
-import { AuthorizationError } from '../../core/errors/app-error.js';
+import { Prisma } from '@prisma/client';
+
+import { AuthorizationError, ConflictError, NotFoundError } from '../../core/errors/app-error.js';
 import * as householdRepository from './household.repository.js';
 import {
   getHouseholdRole,
@@ -15,6 +17,23 @@ function parseHouseholdId(value) {
   } catch {
     return null;
   }
+}
+
+function translateWriteError(error) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+    throw new ConflictError('Ya tienes un espacio financiero con ese nombre.', {
+      code: 'HOUSEHOLD_NAME_CONFLICT',
+    });
+  }
+  throw error;
+}
+
+function mapHousehold(household) {
+  return {
+    ...household,
+    id: household.id.toString(),
+    createdBy: household.createdBy.toString(),
+  };
 }
 
 export function buildHouseholdContext(membership) {
@@ -74,4 +93,54 @@ export async function requireHouseholdContextForUser(userId, rawHouseholdId) {
   }
 
   return context;
+}
+
+export async function createHousehold(userId, data, actor) {
+  try {
+    return mapHousehold(await householdRepository.createHousehold(userId, data, actor));
+  } catch (error) {
+    translateWriteError(error);
+  }
+}
+
+export async function requireHouseholdForUpdate(userId, rawHouseholdId) {
+  const householdId = parseHouseholdId(rawHouseholdId);
+  if (!householdId) {
+    throw new NotFoundError('El espacio financiero solicitado no existe.', {
+      code: 'HOUSEHOLD_NOT_FOUND',
+    });
+  }
+
+  const household = await householdRepository.findHouseholdForUpdate(userId, householdId);
+  if (!household) {
+    throw new NotFoundError('El espacio financiero solicitado no existe.', {
+      code: 'HOUSEHOLD_NOT_FOUND',
+    });
+  }
+
+  return mapHousehold(household);
+}
+
+export async function updateHousehold(userId, rawHouseholdId, data, actor) {
+  const householdId = parseHouseholdId(rawHouseholdId);
+  if (!householdId) {
+    throw new NotFoundError('El espacio financiero solicitado no existe.', {
+      code: 'HOUSEHOLD_NOT_FOUND',
+    });
+  }
+
+  try {
+    const household = await householdRepository.updateHousehold(userId, householdId, data, actor);
+    if (!household) {
+      throw new NotFoundError('El espacio financiero solicitado no existe.', {
+        code: 'HOUSEHOLD_NOT_FOUND',
+      });
+    }
+    return mapHousehold(household);
+  } catch (error) {
+    if (error instanceof NotFoundError) {
+      throw error;
+    }
+    translateWriteError(error);
+  }
 }
