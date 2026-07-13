@@ -1,0 +1,19 @@
+name: Format diagnostics
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  format:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Show Prettier diff
+        run: |
+          git clone --quiet --depth 1 --branch agent/transactions-detail-edit-void https://github.com/Mendo0729/Mendo-Finanzas.git source
+          cd source
+          npm ci --ignore-scripts --silent
+          npx prettier --write tests/transactions-lifecycle.integration.test.js
+          git diff -- tests/transactions-lifecycle.integration.test.js
