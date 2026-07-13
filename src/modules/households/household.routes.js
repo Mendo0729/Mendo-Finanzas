@@ -47,11 +47,7 @@ householdRouter.post(
   asyncHandler(createHousehold),
 );
 
-householdRouter.get(
-  '/current',
-  requireHouseholdMembership,
-  showCurrentHousehold,
-);
+householdRouter.get('/current', requireHouseholdMembership, showCurrentHousehold);
 
 householdRouter.get(
   '/:householdId/edit',
