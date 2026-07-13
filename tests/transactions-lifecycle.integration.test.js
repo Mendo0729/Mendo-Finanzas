@@ -155,18 +155,37 @@ test('consulta el detalle sin revelar movimientos de otros espacios ni transfere
     (error) => error.code === 'TRANSACTION_NOT_FOUND',
   );
 
-  const transfer = await prisma.transaction.create({
-    data: {
-      householdId: householdA.id,
-      accountId: accountA.id,
-      categoryId: null,
-      createdBy: userA.id,
-      transactionType: 3,
-      amount: 10,
-      description: 'Transferencia reservada',
-      transactionDate: new Date('2026-07-13T00:00:00.000Z'),
-      transferGroupId: randomUUID(),
-    },
+  const transferGroupId = randomUUID();
+  const transfer = await prisma.$transaction(async (database) => {
+    const transferOut = await database.transaction.create({
+      data: {
+        householdId: householdA.id,
+        accountId: accountA.id,
+        categoryId: null,
+        createdBy: userA.id,
+        transactionType: 3,
+        amount: 10,
+        description: 'Transferencia reservada',
+        transactionDate: new Date('2026-07-13T00:00:00.000Z'),
+        transferGroupId,
+      },
+    });
+
+    await database.transaction.create({
+      data: {
+        householdId: householdA.id,
+        accountId: secondAccountA.id,
+        categoryId: null,
+        createdBy: userA.id,
+        transactionType: 4,
+        amount: 10,
+        description: 'Transferencia recibida reservada',
+        transactionDate: new Date('2026-07-13T00:00:00.000Z'),
+        transferGroupId,
+      },
+    });
+
+    return transferOut;
   });
 
   await assert.rejects(
