@@ -152,7 +152,10 @@
   color: var(--mf-text);
   background: #fff;
   outline: none;
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    background 150ms ease;
 }
 
 .mf-auth-input:hover {
@@ -198,7 +201,9 @@
   background: linear-gradient(135deg, var(--mf-primary) 0%, var(--mf-primary-dark) 100%);
   font-weight: 800;
   box-shadow: 0 12px 28px rgb(10 170 115 / 24%);
-  transition: transform 150ms ease, box-shadow 150ms ease;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
 }
 
 .mf-auth-submit:hover {

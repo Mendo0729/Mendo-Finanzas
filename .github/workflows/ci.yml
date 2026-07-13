@@ -87,7 +87,7 @@ jobs:
           trap 'kill "$app_pid" 2>/dev/null || true; cat app.log' EXIT
 
           for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:3000/health > health.json; then
+            if curl --fail --silent --show-error http://127.0.0.1:3000/health > health.json; then
               break
             fi
             sleep 1
@@ -95,5 +95,9 @@ jobs:
 
           grep -q '"status":"ok"' health.json
           grep -q '"database":"up"' health.json
-          curl --fail --silent http://127.0.0.1:3000/ | grep -q 'Mendo Finanzas'
-          curl --fail --silent http://127.0.0.1:3000/auth/login | grep -q 'Iniciar sesión'
+
+          curl --fail --silent --show-error http://127.0.0.1:3000/ > home.html
+          grep -q 'Mendo Finanzas' home.html
+
+          curl --fail --silent --show-error http://127.0.0.1:3000/auth/login > login.html
+          grep -q 'Iniciar sesión' login.html
