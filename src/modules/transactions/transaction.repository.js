@@ -1,6 +1,11 @@
 import { prisma } from '../../config/database.js';
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '../../core/audit/audit.constants.js';
-import { TRANSACTION_STATUSES, TRANSACTION_TYPES } from './transaction.constants.js';
+import {
+  TRANSACTION_PAGE_SIZE,
+  TRANSACTION_SORTS,
+  TRANSACTION_STATUSES,
+  TRANSACTION_TYPES,
+} from './transaction.constants.js';
 
 const editableTransactionTypes = [TRANSACTION_TYPES.INCOME, TRANSACTION_TYPES.EXPENSE];
 
@@ -34,6 +39,55 @@ function editableTransactionWhere(householdId, transactionId) {
     transferGroupId: null,
     transactionType: { in: editableTransactionTypes },
   };
+}
+
+function transactionListWhere(householdId, filters) {
+  const where = {
+    householdId,
+    status: TRANSACTION_STATUSES.CONFIRMED,
+    deletedAt: null,
+    transferGroupId: null,
+    transactionType: filters.transactionType ?? {
+      in: editableTransactionTypes,
+    },
+  };
+
+  if (filters.search) {
+    where.description = { contains: filters.search, mode: 'insensitive' };
+  }
+  if (filters.accountId) {
+    where.accountId = filters.accountId;
+  }
+  if (filters.categoryId) {
+    where.categoryId = filters.categoryId;
+  }
+  if (filters.fromDate || filters.toDate) {
+    where.transactionDate = {
+      ...(filters.fromDate ? { gte: filters.fromDate } : {}),
+      ...(filters.toDate ? { lte: filters.toDate } : {}),
+    };
+  }
+  if (filters.minAmount || filters.maxAmount) {
+    where.amount = {
+      ...(filters.minAmount ? { gte: filters.minAmount } : {}),
+      ...(filters.maxAmount ? { lte: filters.maxAmount } : {}),
+    };
+  }
+
+  return where;
+}
+
+function transactionOrderBy(sort) {
+  switch (sort) {
+    case TRANSACTION_SORTS.DATE_ASC:
+      return [{ transactionDate: 'asc' }, { id: 'asc' }];
+    case TRANSACTION_SORTS.AMOUNT_DESC:
+      return [{ amount: 'desc' }, { transactionDate: 'desc' }, { id: 'desc' }];
+    case TRANSACTION_SORTS.AMOUNT_ASC:
+      return [{ amount: 'asc' }, { transactionDate: 'desc' }, { id: 'desc' }];
+    default:
+      return [{ transactionDate: 'desc' }, { id: 'desc' }];
+  }
 }
 
 function auditSnapshot(transaction) {
@@ -78,17 +132,27 @@ async function findReferences(database, householdId, data) {
   return { account, category };
 }
 
-export function listTransactions(householdId) {
-  return prisma.transaction.findMany({
-    where: {
-      householdId,
-      status: TRANSACTION_STATUSES.CONFIRMED,
-      deletedAt: null,
-      transactionType: { in: editableTransactionTypes },
-    },
-    select: transactionSelect,
-    orderBy: [{ transactionDate: 'desc' }, { createdAt: 'desc' }],
-    take: 100,
+export function listTransactions(householdId, filters) {
+  return prisma.$transaction(async (database) => {
+    const where = transactionListWhere(householdId, filters);
+    const total = await database.transaction.count({ where });
+    const totalPages = Math.max(1, Math.ceil(total / TRANSACTION_PAGE_SIZE));
+    const currentPage = Math.min(filters.page, totalPages);
+    const transactions = await database.transaction.findMany({
+      where,
+      select: transactionSelect,
+      orderBy: transactionOrderBy(filters.sort),
+      skip: (currentPage - 1) * TRANSACTION_PAGE_SIZE,
+      take: TRANSACTION_PAGE_SIZE,
+    });
+
+    return {
+      transactions,
+      total,
+      currentPage,
+      totalPages,
+      pageSize: TRANSACTION_PAGE_SIZE,
+    };
   });
 }
 
