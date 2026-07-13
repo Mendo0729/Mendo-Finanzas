@@ -21,7 +21,7 @@
         }) %>
 
         <div class="mf-workspace-content">
-          <section class="mf-household-grid">
+          <section class="mf-form-shell">
             <article class="mf-page-card mf-household-summary">
               <span class="mf-badge mf-badge--success">Espacio activo</span>
               <h2><%= household.name %></h2>
@@ -50,21 +50,6 @@
                 <% } %>
                 <a class="mf-button mf-button--ghost" href="/">Volver al dashboard</a>
               </div>
-            </article>
-
-            <article class="mf-page-card mf-permissions-card">
-              <span class="mf-page-kicker">Acceso actual</span>
-              <h2>Permisos efectivos</h2>
-              <p>Los permisos se calculan desde tu rol actual en cada solicitud.</p>
-
-              <ul class="mf-permission-list">
-                <% permissions.forEach((permission) => { %>
-                  <li>
-                    <span><%= permission.label %></span>
-                    <code><%= permission.key %></code>
-                  </li>
-                <% }) %>
-              </ul>
             </article>
           </section>
         </div>
