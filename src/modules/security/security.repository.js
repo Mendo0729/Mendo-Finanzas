@@ -4,6 +4,13 @@ export function findMfaByUserId(userId) {
   return prisma.userMfa.findUnique({ where: { userId } });
 }
 
+export function findUserPasswordHash(userId) {
+  return prisma.user.findUnique({
+    where: { id: userId },
+    select: { passwordHash: true },
+  });
+}
+
 export function savePendingMfaSecret(userId, encryptedSecret) {
   return prisma.userMfa.upsert({
     where: { userId },
@@ -39,6 +46,38 @@ export function enableMfa(userId, recoveryCodeHashes) {
 
     return mfa;
   });
+}
+
+export function disableMfa(userId) {
+  return prisma.$transaction(async (transaction) => {
+    await transaction.recoveryCode.deleteMany({ where: { userId } });
+    return transaction.userMfa.update({
+      where: { userId },
+      data: {
+        enabled: false,
+        totpSecretEncrypted: null,
+        enabledAt: null,
+        lastVerifiedAt: null,
+      },
+    });
+  });
+}
+
+export function replaceRecoveryCodes(userId, recoveryCodeHashes) {
+  return prisma.$transaction(async (transaction) => {
+    await transaction.recoveryCode.deleteMany({ where: { userId } });
+    await transaction.recoveryCode.createMany({
+      data: recoveryCodeHashes.map((codeHash) => ({ userId, codeHash })),
+    });
+    await transaction.userMfa.update({
+      where: { userId },
+      data: { lastVerifiedAt: new Date() },
+    });
+  });
+}
+
+export function countUnusedRecoveryCodes(userId) {
+  return prisma.recoveryCode.count({ where: { userId, usedAt: null } });
 }
 
 export function recordMfaVerification(userId) {

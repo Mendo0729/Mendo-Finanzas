@@ -1,3 +1,5 @@
+import QRCode from 'qrcode-svg';
+
 import { AuthenticationError, ConflictError } from '../../core/errors/app-error.js';
 import {
   buildOtpAuthUri,
@@ -8,6 +10,7 @@ import {
   hashRecoveryCode,
   verifyTotp,
 } from '../../core/security/mfa.js';
+import { verifyPassword } from '../../core/security/password.js';
 import * as securityRepository from './security.repository.js';
 
 function parseUserId(value) {
@@ -18,21 +21,50 @@ function parseUserId(value) {
   }
 }
 
+function createQrSvg(otpauthUri) {
+  return new QRCode({
+    content: otpauthUri,
+    padding: 4,
+    width: 256,
+    height: 256,
+    color: '#000000',
+    background: '#ffffff',
+    ecl: 'M',
+    join: true,
+    container: 'svg-viewbox',
+  }).svg();
+}
+
 function setupResponse(secret, email) {
+  const otpauthUri = buildOtpAuthUri({ secret, email });
   return {
     secret,
-    otpauthUri: buildOtpAuthUri({ secret, email }),
+    otpauthUri,
+    qrSvg: createQrSvg(otpauthUri),
   };
+}
+
+async function requireValidPassword(userId, password) {
+  const user = await securityRepository.findUserPasswordHash(userId);
+  if (!user || !(await verifyPassword(user.passwordHash, password))) {
+    throw new AuthenticationError('La contraseña actual no es válida.', {
+      code: 'INVALID_CURRENT_PASSWORD',
+    });
+  }
 }
 
 export async function getMfaStatus(rawUserId) {
   const userId = parseUserId(rawUserId);
-  const mfa = await securityRepository.findMfaByUserId(userId);
+  const [mfa, unusedRecoveryCodes] = await Promise.all([
+    securityRepository.findMfaByUserId(userId),
+    securityRepository.countUnusedRecoveryCodes(userId),
+  ]);
 
   return {
     enabled: Boolean(mfa?.enabled),
     enabledAt: mfa?.enabledAt ?? null,
     lastVerifiedAt: mfa?.lastVerifiedAt ?? null,
+    unusedRecoveryCodes,
   };
 }
 
@@ -83,6 +115,34 @@ export async function confirmMfaSetup(rawUserId, token) {
 
   const recoveryCodes = generateRecoveryCodes(10);
   await securityRepository.enableMfa(userId, recoveryCodes.map(hashRecoveryCode));
+  return recoveryCodes;
+}
+
+export async function disableMfa(rawUserId, password) {
+  const userId = parseUserId(rawUserId);
+  const mfa = await securityRepository.findMfaByUserId(userId);
+  if (!mfa?.enabled) {
+    throw new ConflictError('La autenticación en dos pasos ya está desactivada.', {
+      code: 'MFA_ALREADY_DISABLED',
+    });
+  }
+
+  await requireValidPassword(userId, password);
+  await securityRepository.disableMfa(userId);
+}
+
+export async function regenerateRecoveryCodes(rawUserId, password) {
+  const userId = parseUserId(rawUserId);
+  const mfa = await securityRepository.findMfaByUserId(userId);
+  if (!mfa?.enabled) {
+    throw new ConflictError('Debes habilitar MFA antes de generar códigos de recuperación.', {
+      code: 'MFA_NOT_ENABLED',
+    });
+  }
+
+  await requireValidPassword(userId, password);
+  const recoveryCodes = generateRecoveryCodes(10);
+  await securityRepository.replaceRecoveryCodes(userId, recoveryCodes.map(hashRecoveryCode));
   return recoveryCodes;
 }
 

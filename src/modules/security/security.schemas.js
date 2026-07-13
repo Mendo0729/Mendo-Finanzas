@@ -13,3 +13,13 @@ export const mfaCodeSchema = Object.freeze({
     return { token };
   },
 });
+
+export const passwordConfirmationSchema = Object.freeze({
+  parse(value) {
+    const password = typeof value?.password === 'string' ? value.password : '';
+    if (password.length === 0 || password.length > 128) {
+      throw createSchemaError('password', 'Ingresa tu contraseña actual.');
+    }
+    return { password };
+  },
+});
