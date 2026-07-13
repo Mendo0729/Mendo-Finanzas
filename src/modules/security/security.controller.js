@@ -64,10 +64,7 @@ export async function confirmMfaSetup(request, response, next) {
 
 export async function disableMfa(request, response, next) {
   try {
-    await securityService.disableMfa(
-      request.context.user.id,
-      request.validated.body.password,
-    );
+    await securityService.disableMfa(request.context.user.id, request.validated.body.password);
     response.redirect(303, '/security?mfa=disabled');
   } catch (error) {
     if (error instanceof AuthenticationError) {
