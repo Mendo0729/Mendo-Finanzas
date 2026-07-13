@@ -83,7 +83,9 @@ export function verifyTotp(secret, token, timestamp = Date.now(), window = 1) {
 
   const supplied = Buffer.from(normalized);
   for (let offset = -window; offset <= window; offset += 1) {
-    const expected = Buffer.from(generateTotp(secret, timestamp + offset * TOTP_PERIOD_SECONDS * 1000));
+    const expected = Buffer.from(
+      generateTotp(secret, timestamp + offset * TOTP_PERIOD_SECONDS * 1000),
+    );
     if (timingSafeEqual(supplied, expected)) return true;
   }
   return false;
@@ -115,5 +117,11 @@ export function generateRecoveryCodes(count = 10) {
 }
 
 export function hashRecoveryCode(code) {
-  return createHash('sha256').update(String(code).replace(/[^A-Z0-9]/gi, '').toUpperCase()).digest('hex');
+  return createHash('sha256')
+    .update(
+      String(code)
+        .replace(/[^A-Z0-9]/gi, '')
+        .toUpperCase(),
+    )
+    .digest('hex');
 }

@@ -5,11 +5,7 @@ import { validate } from '../../core/middleware/validate.js';
 import { verifyCsrfToken } from '../../core/security/csrf.js';
 import { asyncHandler } from '../../core/utils/async-handler.js';
 import { requireAuthentication } from '../auth/auth.middleware.js';
-import {
-  confirmMfaSetup,
-  showMfaSetup,
-  showSecurity,
-} from './security.controller.js';
+import { confirmMfaSetup, showMfaSetup, showSecurity } from './security.controller.js';
 import { mfaCodeSchema } from './security.schemas.js';
 
 const mfaConfirmationLimiter = createRateLimiter({
