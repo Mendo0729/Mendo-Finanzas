@@ -34,13 +34,7 @@ export async function confirmMfaSetup(request, response, next) {
     });
   } catch (error) {
     if (error instanceof AuthenticationError) {
-      const mfa = await securityService.getMfaStatus(request.context.user.id);
-      if (mfa.enabled) {
-        response.redirect(303, '/security');
-        return;
-      }
-
-      const setup = await securityService.beginMfaSetup(
+      const setup = await securityService.getPendingMfaSetup(
         request.context.user.id,
         request.context.user.email,
       );
