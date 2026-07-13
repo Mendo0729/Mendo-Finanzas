@@ -2,6 +2,7 @@ import { isEditableTransactionType } from './transaction.constants.js';
 
 const MAX_BIGINT = 9_223_372_036_854_775_807n;
 const MONEY_PATTERN = /^\d{1,12}(?:\.\d{1,2})?$/;
+const ZERO_MONEY_PATTERN = /^0+(?:\.0{1,2})?$/;
 const DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
 function schemaError(path, message) {
@@ -38,7 +39,7 @@ function money(value) {
   if (!MONEY_PATTERN.test(normalized)) {
     throw schemaError('amount', 'Escribe un monto válido con máximo dos decimales.');
   }
-  if (Number(normalized) <= 0) {
+  if (ZERO_MONEY_PATTERN.test(normalized)) {
     throw schemaError('amount', 'El monto debe ser mayor que cero.');
   }
   return normalized;
