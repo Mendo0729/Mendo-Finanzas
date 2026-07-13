@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'budgets' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
+
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Presupuestos',
+          headerTitle: pageTitle,
+          primaryAction: null,
+        }) %>
+
+        <div class="mf-workspace-content">
+          <div class="mf-form-shell">
+            <section class="mf-form-panel">
+              <div class="mf-form-panel__header">
+                <span class="mf-page-kicker">Planificación mensual</span>
+                <h2><%= pageTitle %></h2>
+                <p>Selecciona una categoría de gasto, el mes y el límite que deseas controlar.</p>
+              </div>
+
+              <% if (categories.length === 0) { %>
+                <section class="mf-empty-state">
+                  <h3 class="h5">No hay categorías de gasto disponibles</h3>
+                  <p>Primero debes crear una categoría de gasto activa.</p>
+                  <div class="mf-form-actions">
+                    <a class="mf-button mf-button--primary" href="/categories/new">Crear categoría</a>
+                    <a class="mf-button mf-button--ghost" href="/budgets">Volver</a>
+                  </div>
+                </section>
+              <% } else { %>
+                <form method="post" action="<%= action %>">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+                  <div class="mf-form-grid">
+                    <div class="mf-form-field mf-form-field--12">
+                      <label for="categoryId">Categoría de gasto</label>
+                      <select class="mf-select" id="categoryId" name="categoryId" required>
+                        <option value="">Selecciona una categoría</option>
+                        <% categories.forEach((category) => { %>
+                          <option
+                            value="<%= category.id %>"
+                            <%= values.categoryId === category.id ? 'selected' : '' %>
+                          >
+                            <%= category.name %>
+                          </option>
+                        <% }) %>
+                      </select>
+                    </div>
+
+                    <div class="mf-form-field mf-form-field--6">
+                      <label for="month">Mes</label>
+                      <input
+                        class="mf-input"
+                        id="month"
+                        name="month"
+                        type="month"
+                        min="2000-01"
+                        max="2100-12"
+                        required
+                        value="<%= values.month %>"
+                      />
+                    </div>
+
+                    <div class="mf-form-field mf-form-field--6">
+                      <label for="amount">Límite mensual</label>
+                      <input
+                        class="mf-input"
+                        id="amount"
+                        name="amount"
+                        inputmode="decimal"
+                        required
+                        value="<%= values.amount %>"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="mf-form-actions">
+                    <button class="mf-button mf-button--primary" type="submit">
+                      <%= submitLabel %>
+                    </button>
+                    <a class="mf-button mf-button--ghost" href="/budgets?month=<%= values.month %>">
+                      Cancelar
+                    </a>
+                  </div>
+                </form>
+              <% } %>
+            </section>
+          </div>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
