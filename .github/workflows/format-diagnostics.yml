@@ -10,27 +10,21 @@ jobs:
   format:
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Configure Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-      - name: Install formatter
-        run: npm ci --ignore-scripts --silent
       - name: Check changed files
-        run: >-
-          npx prettier --check
-          package.json
-          src/core/audit/audit.constants.js
-          src/modules/transactions/transaction.controller.js
-          src/modules/transactions/transaction.repository.js
-          src/modules/transactions/transaction.routes.js
-          src/modules/transactions/transaction.schemas.js
-          src/modules/transactions/transaction.service.js
-          src/views/transactions/detail.ejs
-          src/views/transactions/form.ejs
-          src/views/transactions/index.ejs
-          tests/transactions-lifecycle.integration.test.js
-          tests/unit/transaction.schemas.test.js
+        run: |
+          git clone --quiet --depth 1 --branch agent/transactions-detail-edit-void https://github.com/Mendo0729/Mendo-Finanzas.git source
+          cd source
+          npm ci --ignore-scripts --silent
+          npx prettier --check \
+            package.json \
+            src/core/audit/audit.constants.js \
+            src/modules/transactions/transaction.controller.js \
+            src/modules/transactions/transaction.repository.js \
+            src/modules/transactions/transaction.routes.js \
+            src/modules/transactions/transaction.schemas.js \
+            src/modules/transactions/transaction.service.js \
+            src/views/transactions/detail.ejs \
+            src/views/transactions/form.ejs \
+            src/views/transactions/index.ejs \
+            tests/transactions-lifecycle.integration.test.js \
+            tests/unit/transaction.schemas.test.js
