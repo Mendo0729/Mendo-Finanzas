@@ -18,9 +18,10 @@
               <div class="alert alert-info mb-4" role="alert">
                 Tu cuenta todavía no tiene espacios financieros asignados.
               </div>
-              <p class="mb-0 text-body-secondary">
-                La creación de espacios y la administración de integrantes se incorporarán en una fase posterior.
+              <p class="text-body-secondary">
+                Crea tu primer espacio para comenzar a registrar cuentas, categorías y movimientos.
               </p>
+              <a class="btn btn-primary" href="/households/new">Crear mi primer espacio</a>
             <% } else { %>
               <form method="post" action="/households/select">
                 <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
@@ -54,6 +55,7 @@
 
                 <div class="d-flex flex-wrap gap-2">
                   <button class="btn btn-primary" type="submit">Usar este espacio</button>
+                  <a class="btn btn-outline-primary" href="/households/new">Crear otro espacio</a>
                   <a class="btn btn-outline-secondary" href="/">Volver al inicio</a>
                 </div>
               </form>
