@@ -35,6 +35,7 @@ jobs:
       APP_URL: http://127.0.0.1:3000
       DATABASE_URL: postgresql://mendo_dev:mendo_dev_ci@127.0.0.1:5432/mendo_finanzas_dev?schema=public
       SESSION_SECRET: ci_only_session_secret_with_at_least_32_characters
+      MFA_ENCRYPTION_KEY: MDEyMzQ1Njc4OUFCQ0RFRjAxMjM0NTY3ODlBQkNERUY=
 
     steps:
       - name: Checkout
