@@ -1,110 +1,127 @@
 <!doctype html>
 <html lang="es">
   <%- include('../partials/head') %>
-  <body class="bg-body-tertiary min-vh-100 d-flex flex-column">
-    <%- include('../partials/navbar') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'security' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
 
-    <main class="container py-5 flex-grow-1">
-      <div class="row justify-content-center">
-        <div class="col-lg-8">
-          <section class="rounded-4 bg-white p-4 p-md-5 shadow-sm">
-            <span class="badge text-bg-primary mb-3">Cuenta</span>
-            <h1 class="h2">Seguridad</h1>
-            <p class="text-body-secondary mb-4">
-              Protege el acceso a tu cuenta con una aplicación de autenticación.
-            </p>
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Cuenta',
+          headerTitle: 'Seguridad',
+          primaryAction: !mfa.enabled
+            ? { href: '/security/mfa/setup', label: 'Configurar MFA' }
+            : null,
+        }) %>
 
-            <% if (successMessage) { %>
-              <div class="alert alert-success"><%= successMessage %></div>
-            <% } %>
-            <% if (formError) { %>
-              <div class="alert alert-danger"><%= formError %></div>
-            <% } %>
+        <div class="mf-workspace-content">
+          <div class="mf-page-intro">
+            <div>
+              <span class="mf-page-kicker">Protección de acceso</span>
+              <h2>Seguridad de la cuenta</h2>
+              <p>Administra la autenticación en dos pasos y tus códigos de recuperación.</p>
+            </div>
+          </div>
 
-            <div class="border rounded-3 p-4 mb-4 d-flex flex-column flex-md-row justify-content-between gap-3">
+          <% if (successMessage) { %>
+            <div class="mf-alert mf-alert--success mb-3" role="status">
+              <%= successMessage %>
+            </div>
+          <% } %>
+          <% if (formError) { %>
+            <div class="mf-alert mf-alert--danger mb-3" role="alert"><%= formError %></div>
+          <% } %>
+
+          <section class="mf-security-layout">
+            <article class="mf-page-card mf-security-status">
               <div>
-                <h2 class="h5 mb-2">Autenticación en dos pasos</h2>
+                <span class="mf-page-kicker">Estado actual</span>
+                <h3>Autenticación en dos pasos</h3>
                 <% if (mfa.enabled) { %>
-                  <span class="badge text-bg-success">Habilitada</span>
-                  <p class="small text-body-secondary mt-2 mb-1">
-                    Activada el <%= mfa.enabledAt.toLocaleDateString('es-PA') %>.
-                  </p>
-                  <p class="small text-body-secondary mb-0">
-                    Códigos de recuperación disponibles: <strong><%= mfa.unusedRecoveryCodes %></strong>
+                  <p>
+                    Activada el <%= mfa.enabledAt.toLocaleDateString('es-PA') %>. Códigos de
+                    recuperación disponibles: <strong><%= mfa.unusedRecoveryCodes %></strong>.
                   </p>
                 <% } else { %>
-                  <span class="badge text-bg-secondary">Desactivada</span>
-                  <p class="small text-body-secondary mt-2 mb-0">
-                    Compatible con Google Authenticator y Microsoft Authenticator.
+                  <p>
+                    Añade una segunda capa de protección compatible con Google Authenticator y
+                    Microsoft Authenticator.
                   </p>
                 <% } %>
               </div>
-
-              <% if (!mfa.enabled) { %>
-                <div class="align-self-md-center">
-                  <a class="btn btn-primary" href="/security/mfa/setup">Configurar Authenticator</a>
-                </div>
-              <% } %>
-            </div>
+              <span class="mf-badge <%= mfa.enabled ? 'mf-badge--success' : 'mf-badge--danger' %>">
+                <%= mfa.enabled ? 'Habilitada' : 'Desactivada' %>
+              </span>
+            </article>
 
             <% if (mfa.enabled) { %>
-              <div class="row g-4">
-                <div class="col-md-6">
-                  <div class="border rounded-3 p-4 h-100">
-                    <h2 class="h5">Regenerar códigos de recuperación</h2>
-                    <p class="small text-body-secondary">
-                      Los códigos anteriores dejarán de funcionar inmediatamente.
-                    </p>
-                    <form method="post" action="/security/mfa/recovery-codes/regenerate" class="vstack gap-3">
-                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                      <div>
-                        <label class="form-label" for="regenerate-password">Contraseña actual</label>
-                        <input
-                          class="form-control"
-                          id="regenerate-password"
-                          name="password"
-                          type="password"
-                          autocomplete="current-password"
-                          maxlength="128"
-                          required
-                        />
-                      </div>
-                      <button class="btn btn-outline-primary" type="submit">Generar nuevos códigos</button>
-                    </form>
+              <article class="mf-page-card mf-security-card">
+                <h3>Regenerar códigos de recuperación</h3>
+                <p>Los códigos anteriores dejarán de funcionar inmediatamente.</p>
+                <form method="post" action="/security/mfa/recovery-codes/regenerate">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <div class="mf-form-field">
+                    <label for="regenerate-password">Contraseña actual</label>
+                    <input
+                      class="mf-input"
+                      id="regenerate-password"
+                      name="password"
+                      type="password"
+                      autocomplete="current-password"
+                      maxlength="128"
+                      required
+                    />
                   </div>
-                </div>
+                  <button class="mf-button mf-button--ghost" type="submit">
+                    Generar nuevos códigos
+                  </button>
+                </form>
+              </article>
 
-                <div class="col-md-6">
-                  <div class="border border-danger rounded-3 p-4 h-100">
-                    <h2 class="h5 text-danger">Desactivar MFA</h2>
-                    <p class="small text-body-secondary">
-                      Tu cuenta volverá a depender solamente del correo y la contraseña.
-                    </p>
-                    <form method="post" action="/security/mfa/disable" class="vstack gap-3">
-                      <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-                      <div>
-                        <label class="form-label" for="disable-password">Contraseña actual</label>
-                        <input
-                          class="form-control"
-                          id="disable-password"
-                          name="password"
-                          type="password"
-                          autocomplete="current-password"
-                          maxlength="128"
-                          required
-                        />
-                      </div>
-                      <button class="btn btn-outline-danger" type="submit">Desactivar autenticación en dos pasos</button>
-                    </form>
+              <article class="mf-page-card mf-security-card mf-security-card--danger">
+                <h3>Desactivar MFA</h3>
+                <p>Tu cuenta volverá a depender solamente del correo y la contraseña.</p>
+                <form method="post" action="/security/mfa/disable">
+                  <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                  <div class="mf-form-field">
+                    <label for="disable-password">Contraseña actual</label>
+                    <input
+                      class="mf-input"
+                      id="disable-password"
+                      name="password"
+                      type="password"
+                      autocomplete="current-password"
+                      maxlength="128"
+                      required
+                    />
                   </div>
+                  <button class="mf-button mf-button--danger-ghost" type="submit">
+                    Desactivar autenticación en dos pasos
+                  </button>
+                </form>
+              </article>
+            <% } else { %>
+              <article class="mf-page-card mf-security-card">
+                <h3>Configura tu aplicación de autenticación</h3>
+                <p>
+                  Escanearás un código QR y confirmarás la configuración con un código temporal.
+                </p>
+                <div class="mf-form-actions">
+                  <a class="mf-button mf-button--primary" href="/security/mfa/setup">
+                    Configurar Authenticator
+                  </a>
                 </div>
-              </div>
+              </article>
             <% } %>
           </section>
         </div>
-      </div>
-    </main>
-
-    <%- include('../partials/footer') %>
+      </main>
+    </div>
   </body>
 </html>
