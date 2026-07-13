@@ -22,9 +22,7 @@ export async function listTransactions(request, response) {
 }
 
 export async function showCreateTransaction(request, response) {
-  const options = await transactionService.getTransactionFormOptions(
-    request.context.household.id,
-  );
+  const options = await transactionService.getTransactionFormOptions(request.context.household.id);
   response.render('transactions/form', {
     pageTitle: 'Nuevo movimiento',
     values: formValues(),
