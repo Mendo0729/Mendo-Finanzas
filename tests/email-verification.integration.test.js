@@ -1,10 +1,12 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
-import { after, beforeEach, test } from 'node:test';
+import { after, before, beforeEach, test } from 'node:test';
 
 import { prisma } from '../src/config/database.js';
 import {
   clearTestEmailOutbox,
+  disableTestEmailOutbox,
+  enableTestEmailOutbox,
   readTestEmailOutbox,
 } from '../src/core/email/email.service.js';
 import {
@@ -28,6 +30,10 @@ function tokenFromOutbox() {
   return token;
 }
 
+before(() => {
+  enableTestEmailOutbox();
+});
+
 beforeEach(() => {
   clearTestEmailOutbox();
 });
@@ -37,6 +43,7 @@ after(async () => {
   await prisma.user.deleteMany({
     where: { email: { startsWith: EMAIL_PREFIX } },
   });
+  disableTestEmailOutbox();
   await prisma.$disconnect();
 });
 
