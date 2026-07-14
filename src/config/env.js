@@ -19,6 +19,8 @@ const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const sessionSecret = process.env.SESSION_SECRET;
 const mfaEncryptionKey = process.env.MFA_ENCRYPTION_KEY;
 const rawAppUrl = process.env.APP_URL ?? `http://localhost:${port}`;
+const resendApiKey = process.env.RESEND_API_KEY?.trim() || null;
+const emailFrom = process.env.EMAIL_FROM?.trim() || null;
 
 if (!validNodeEnvironments.has(nodeEnv)) {
   throw new Error('NODE_ENV debe ser development, test o production.');
@@ -48,6 +50,10 @@ if (decodedMfaKey.length !== 32) {
   throw new Error('MFA_ENCRYPTION_KEY debe ser una clave de 32 bytes codificada en Base64.');
 }
 
+if (Boolean(resendApiKey) !== Boolean(emailFrom)) {
+  throw new Error('RESEND_API_KEY y EMAIL_FROM deben configurarse juntas.');
+}
+
 const isProduction = nodeEnv === 'production';
 if (isProduction) {
   if (parsedAppUrl.protocol !== 'https:') {
@@ -59,6 +65,9 @@ if (isProduction) {
   if (insecureProductionMfaKeys.has(mfaEncryptionKey)) {
     throw new Error('MFA_ENCRYPTION_KEY no puede utilizar una clave de ejemplo en producción.');
   }
+  if (!resendApiKey || !emailFrom) {
+    throw new Error('La configuración de correo es obligatoria en producción.');
+  }
 }
 
 export const env = Object.freeze({
@@ -68,6 +77,8 @@ export const env = Object.freeze({
   databaseUrl: process.env.DATABASE_URL,
   sessionSecret,
   mfaEncryptionKey,
+  resendApiKey,
+  emailFrom,
   isDevelopment: nodeEnv === 'development',
   isProduction,
 });
