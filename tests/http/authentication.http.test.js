@@ -65,6 +65,7 @@ test('el registro requiere CSRF, guarda Argon2id y crea una sesión PostgreSQL',
   const csrfToken = extractCsrfToken(registerHtml);
 
   assert.equal(registerPage.status, 200);
+  assert.equal(registerPage.headers.get('cache-control'), 'no-store');
   assert.ok(cookie);
 
   const rejected = await request('/auth/register', {
@@ -106,6 +107,7 @@ test('el registro requiere CSRF, guarda Argon2id y crea una sesión PostgreSQL',
 
   const authenticatedHome = await request('/', { cookie });
   const authenticatedHtml = await authenticatedHome.text();
+  assert.equal(authenticatedHome.headers.get('cache-control'), 'no-store');
   assert.match(authenticatedHtml, /Usuario de prueba/);
 
   const logoutToken = extractCsrfToken(authenticatedHtml);
@@ -125,6 +127,8 @@ test('el login usa un mensaje genérico y regenera la sesión al autenticar', as
   const loginHtml = await loginPage.text();
   let cookie = parseCookie(loginPage.headers.get('set-cookie'));
   const firstToken = extractCsrfToken(loginHtml);
+
+  assert.equal(loginPage.headers.get('cache-control'), 'no-store');
 
   const rejected = await request('/auth/login', {
     method: 'POST',
