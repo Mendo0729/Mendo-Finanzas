@@ -201,6 +201,18 @@ model Session {
   @@map("sessions")
 }
 
+model RateLimitBucket {
+  scope     String   @db.VarChar(80)
+  keyHash   String   @map("key_hash") @db.Char(64)
+  attempts  Int      @default(1)
+  resetAt   DateTime @map("reset_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@id([scope, keyHash])
+  @@index([resetAt])
+  @@map("rate_limit_buckets")
+}
+
 model AuditLog {
   id          BigInt   @id @default(autoincrement())
   userId      BigInt?  @map("user_id")
