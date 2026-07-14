@@ -1,0 +1,135 @@
+/* Budget-specific workspace components */
+.mf-page-intro > .mf-table-actions:has(input[type='month']) {
+  display: grid;
+  grid-template-areas: 'previous picker next';
+  grid-template-columns: auto minmax(250px, 1fr) auto;
+  width: min(100%, 560px);
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border: 1px solid var(--mf-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgb(16 24 40 / 6%);
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > a,
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > form > button {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 0.8rem;
+  font-weight: 760;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease,
+    color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > a {
+  border: 1px solid transparent;
+  color: #344054;
+  background: #f8fafc;
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > a:hover {
+  color: var(--mf-primary-dark);
+  border-color: #b9e4d4;
+  background: #f1fbf7;
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > a:first-child {
+  grid-area: previous;
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > a:last-child {
+  grid-area: next;
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > form {
+  grid-area: picker;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-width: 0;
+  gap: 8px;
+  margin: 0;
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) input[type='month'] {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 13px;
+  border: 1px solid #d8dee8;
+  border-radius: 10px;
+  color: var(--mf-text);
+  background: #fff;
+  font: inherit;
+  outline: none;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) input[type='month']:focus {
+  border-color: #65cba8;
+  box-shadow: 0 0 0 4px rgb(10 170 115 / 11%);
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > form > button {
+  border: 1px solid var(--mf-primary);
+  color: #fff;
+  background: var(--mf-primary);
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > form > button:hover {
+  border-color: var(--mf-primary-dark);
+  background: var(--mf-primary-dark);
+}
+
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > a:focus-visible,
+.mf-page-intro > .mf-table-actions:has(input[type='month']) > form > button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgb(10 170 115 / 14%);
+}
+
+@media (max-width: 1280px) {
+  .mf-page-intro:has(.mf-table-actions input[type='month']) {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .mf-page-intro > .mf-table-actions:has(input[type='month']) {
+    width: 100%;
+  }
+}
+
+@media (max-width: 720px) {
+  .mf-page-intro > .mf-table-actions:has(input[type='month']) {
+    grid-template-areas:
+      'picker picker'
+      'previous next';
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mf-page-intro > .mf-table-actions:has(input[type='month']) > a {
+    width: 100%;
+  }
+}
+
+@media (max-width: 380px) {
+  .mf-page-intro > .mf-table-actions:has(input[type='month']) > form {
+    grid-template-columns: 1fr;
+  }
+
+  .mf-page-intro > .mf-table-actions:has(input[type='month']) > form > button {
+    width: 100%;
+  }
+}
