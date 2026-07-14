@@ -38,6 +38,16 @@
       </a>
     <% } %>
 
+    <% if (householdPermissions.includes('budgets:view')) { %>
+      <a
+        class="mf-nav-link <%= activeSection === 'budgets' ? 'is-active' : '' %>"
+        href="/budgets"
+        <%- activeSection === 'budgets' ? 'aria-current="page"' : '' %>
+      >
+        <span aria-hidden="true">◎</span> Presupuestos
+      </a>
+    <% } %>
+
     <% if (householdPermissions.includes('categories:view')) { %>
       <a
         class="mf-nav-link <%= activeSection === 'categories' ? 'is-active' : '' %>"

@@ -1,0 +1,197 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="mf-app-body">
+    <div class="mf-workspace-shell">
+      <%- include('../partials/app-sidebar', { activeSection: 'budgets' }) %>
+      <button
+        class="mf-sidebar-backdrop"
+        type="button"
+        data-sidebar-close
+        aria-label="Cerrar menú"
+      ></button>
+
+      <main class="mf-workspace-main">
+        <%- include('../partials/app-header', {
+          headerEyebrow: 'Planificación',
+          headerTitle: 'Presupuestos',
+          primaryAction: householdPermissions.includes('budgets:manage')
+            ? { href: `/budgets/new?month=${month}`, label: 'Nuevo presupuesto' }
+            : null,
+        }) %>
+
+        <div class="mf-workspace-content">
+          <div class="mf-page-intro">
+            <div>
+              <span class="mf-page-kicker">Control mensual</span>
+              <h2><%= monthLabel %></h2>
+              <p>Compara tus límites planificados con los gastos reales del espacio activo.</p>
+            </div>
+            <div class="mf-table-actions">
+              <a class="mf-small-button" href="/budgets?month=<%= previousMonth %>">Mes anterior</a>
+              <form method="get" action="/budgets">
+                <input
+                  class="mf-input"
+                  type="month"
+                  name="month"
+                  value="<%= month %>"
+                  aria-label="Seleccionar mes"
+                />
+                <button class="mf-small-button" type="submit">Ir</button>
+              </form>
+              <a class="mf-small-button" href="/budgets?month=<%= nextMonth %>">Mes siguiente</a>
+            </div>
+          </div>
+
+          <section class="mf-metrics-grid" aria-label="Resumen de presupuestos">
+            <article class="mf-metric-card">
+              <div class="mf-metric-card__header">
+                <span class="mf-chip">Límite planificado</span>
+              </div>
+              <strong
+                class="mf-metric-value"
+                data-currency-value="<%= summary.totalLimit %>"
+                data-currency="<%= currentHousehold.currency %>"
+              ></strong>
+              <p><%= summary.activeCount %> presupuestos activos</p>
+            </article>
+            <article class="mf-metric-card">
+              <div class="mf-metric-card__header">
+                <span class="mf-chip">Gastado</span>
+              </div>
+              <strong
+                class="mf-metric-value"
+                data-currency-value="<%= summary.totalSpent %>"
+                data-currency="<%= currentHousehold.currency %>"
+              ></strong>
+              <p>Solo movimientos confirmados del mes</p>
+            </article>
+            <article class="mf-metric-card">
+              <div class="mf-metric-card__header">
+                <span class="mf-chip"><%= summary.exceeded ? 'Exceso total' : 'Disponible' %></span>
+              </div>
+              <strong
+                class="mf-metric-value"
+                data-currency-value="<%= summary.exceeded ? summary.totalRemaining.replace('-', '') : summary.totalRemaining %>"
+                data-currency="<%= currentHousehold.currency %>"
+              ></strong>
+              <p><%= summary.exceeded ? 'Los gastos superan el límite activo' : 'Margen restante del mes' %></p>
+            </article>
+          </section>
+
+          <% if (budgets.length > 0) { %>
+            <section class="mf-data-table-wrap" aria-label="Listado de presupuestos">
+              <table class="mf-data-table">
+                <thead>
+                  <tr>
+                    <th>Categoría</th>
+                    <th>Límite</th>
+                    <th>Gastado</th>
+                    <th>Progreso</th>
+                    <th>Estado</th>
+                    <th class="text-end">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% budgets.forEach((budget) => { %>
+                    <tr>
+                      <td>
+                        <div class="mf-data-table__title">
+                          <span class="mf-category-marker mf-category-marker--expense" aria-hidden="true"></span>
+                          <span><%= budget.category.name %></span>
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          data-currency-value="<%= budget.amount %>"
+                          data-currency="<%= currentHousehold.currency %>"
+                        ></span>
+                      </td>
+                      <td>
+                        <span
+                          data-currency-value="<%= budget.spent %>"
+                          data-currency="<%= currentHousehold.currency %>"
+                        ></span>
+                      </td>
+                      <td>
+                        <div class="mf-budget-item">
+                          <div class="mf-budget-item__header">
+                            <span><%= budget.percentage %>%</span>
+                            <small>
+                              <% if (!budget.exceeded) { %>
+                                Disponible
+                                <span
+                                  data-currency-value="<%= budget.remaining %>"
+                                  data-currency="<%= currentHousehold.currency %>"
+                                ></span>
+                              <% } else { %>
+                                Excedido por
+                                <span
+                                  data-currency-value="<%= budget.exceededAmount %>"
+                                  data-currency="<%= currentHousehold.currency %>"
+                                ></span>
+                              <% } %>
+                            </small>
+                          </div>
+                          <div
+                            class="mf-progress"
+                            role="progressbar"
+                            aria-valuenow="<%= Math.min(budget.percentage, 100) %>"
+                            aria-valuemin="0"
+                            aria-valuemax="100"
+                          >
+                            <span style="width: <%= Math.min(budget.percentage, 100) %>%"></span>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          class="mf-badge <%= budget.active && budget.progressState === 'normal' ? 'mf-badge--success' : budget.active && budget.progressState === 'exceeded' ? 'mf-badge--danger' : '' %>"
+                        >
+                          <%= budget.active ? budget.progressLabel : 'Inactivo' %>
+                        </span>
+                      </td>
+                      <td>
+                        <% if (householdPermissions.includes('budgets:manage')) { %>
+                          <div class="mf-table-actions">
+                            <a
+                              class="mf-small-button mf-small-button--primary"
+                              href="/budgets/<%= budget.id %>/edit"
+                            >
+                              Editar
+                            </a>
+                            <form method="post" action="/budgets/<%= budget.id %>/status">
+                              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                              <input
+                                type="hidden"
+                                name="active"
+                                value="<%= budget.active ? 'false' : 'true' %>"
+                              />
+                              <button class="mf-small-button" type="submit">
+                                <%= budget.active ? 'Desactivar' : 'Activar' %>
+                              </button>
+                            </form>
+                          </div>
+                        <% } %>
+                      </td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </section>
+          <% } else { %>
+            <section class="mf-empty-state">
+              <h2 class="h5">No hay presupuestos para <%= monthLabel %></h2>
+              <p>Define límites por categoría para comparar tu planificación con los gastos reales.</p>
+              <% if (householdPermissions.includes('budgets:manage')) { %>
+                <a class="mf-button mf-button--primary" href="/budgets/new?month=<%= month %>">
+                  Crear presupuesto
+                </a>
+              <% } %>
+            </section>
+          <% } %>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
