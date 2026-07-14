@@ -50,7 +50,9 @@ export function replaceEmailVerificationToken(
   database = prisma,
 ) {
   return database.$transaction(async (transaction) => {
-    await transaction.$queryRaw`SELECT pg_advisory_xact_lock(${userId})`;
+    await transaction.$queryRaw`
+      SELECT pg_advisory_xact_lock(${userId})::text AS "lockResult"
+    `;
 
     await transaction.authToken.updateMany({
       where: {
