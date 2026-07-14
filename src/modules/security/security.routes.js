@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { createRateLimiter } from '../../core/middleware/rate-limit.js';
 import { validate } from '../../core/middleware/validate.js';
 import { verifyCsrfToken } from '../../core/security/csrf.js';
+import { PostgresRateLimitStore } from '../../core/security/postgres-rate-limit-store.js';
 import { asyncHandler } from '../../core/utils/async-handler.js';
 import { requireAuthentication } from '../auth/auth.middleware.js';
 import {
@@ -18,12 +19,14 @@ const mfaConfirmationLimiter = createRateLimiter({
   windowMs: 10 * 60 * 1000,
   limit: 10,
   keyGenerator: (request) => `${request.ip}:${request.context?.user?.id ?? 'anonymous'}`,
+  store: new PostgresRateLimitStore({ scope: 'security.mfa.confirm' }),
 });
 
 const mfaManagementLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 5,
   keyGenerator: (request) => `${request.ip}:${request.context?.user?.id ?? 'anonymous'}`,
+  store: new PostgresRateLimitStore({ scope: 'security.mfa.manage' }),
 });
 
 export const securityRouter = Router();
