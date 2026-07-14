@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="mf-auth-body">
+    <%- include('../partials/navbar') %>
+
+    <main class="mf-auth-main">
+      <div class="mf-auth-layout">
+        <section class="mf-auth-intro" aria-labelledby="resultIntroTitle">
+          <span class="mf-auth-intro__eyebrow">Seguridad de cuenta</span>
+          <h1 id="resultIntroTitle">
+            <%= verified ? 'Tu correo quedó confirmado.' : 'No pudimos confirmar el enlace.' %>
+          </h1>
+          <p>
+            <%= verified
+              ? 'La cuenta ya puede continuar con el proceso normal de autenticación.'
+              : 'Los enlaces vencen después de 30 minutos y solo pueden utilizarse una vez.' %>
+          </p>
+        </section>
+
+        <section class="mf-auth-card" aria-labelledby="resultTitle">
+          <div class="mf-auth-card__body">
+            <span class="mf-auth-card__badge"><%= verified ? 'Verificación completada' : 'Enlace inválido' %></span>
+            <h1 id="resultTitle"><%= verified ? 'Correo verificado' : 'Solicita un enlace nuevo' %></h1>
+            <div class="mf-auth-alert" role="status"><%= message %></div>
+
+            <p class="mf-auth-switch">
+              <% if (verified) { %>
+                <a href="/auth/login">Ir a iniciar sesión</a>
+              <% } else { %>
+                <a href="/auth/verify-email/pending">Reenviar enlace de verificación</a>
+              <% } %>
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>
