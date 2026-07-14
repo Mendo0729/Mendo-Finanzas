@@ -10,6 +10,8 @@ const validProductionEnvironment = {
   DATABASE_URL: 'postgresql://user:password@database.example.com:5432/finanzas',
   SESSION_SECRET: 'production-session-secret-with-more-than-32-characters',
   MFA_ENCRYPTION_KEY: Buffer.alloc(32, 7).toString('base64'),
+  RESEND_API_KEY: 're_test_api_key',
+  EMAIL_FROM: 'SharedWallet <no-reply@mail.example.com>',
 };
 
 function runModule(modulePath, environment) {
@@ -43,6 +45,23 @@ test('rechaza HTTP y secretos de ejemplo en producción', () => {
   });
   assert.notEqual(insecureSecret.status, 0);
   assert.match(insecureSecret.stderr, /valor de ejemplo/);
+});
+
+test('requiere la configuración completa de correo en producción', () => {
+  const missingEmailConfiguration = runModule('./src/config/env.js', {
+    ...validProductionEnvironment,
+    RESEND_API_KEY: '',
+    EMAIL_FROM: '',
+  });
+  assert.notEqual(missingEmailConfiguration.status, 0);
+  assert.match(missingEmailConfiguration.stderr, /correo es obligatoria en producción/);
+
+  const partialEmailConfiguration = runModule('./src/config/env.js', {
+    ...validProductionEnvironment,
+    EMAIL_FROM: '',
+  });
+  assert.notEqual(partialEmailConfiguration.status, 0);
+  assert.match(partialEmailConfiguration.stderr, /deben configurarse juntas/);
 });
 
 test('rechaza valores desconocidos de NODE_ENV', () => {
