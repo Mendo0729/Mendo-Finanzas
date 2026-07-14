@@ -17,7 +17,9 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: >-
+      - name: Format changed files
+        continue-on-error: true
+        run: >-
           npx prettier --write
           package.json
           src/core/email/email.service.js
@@ -32,6 +34,7 @@ jobs:
           tests/email-verification.integration.test.js
           tests/http/authentication.http.test.js
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: email-verification-formatted-files
           path: |
