@@ -9,9 +9,12 @@ import {
   login,
   logout,
   register,
+  resendVerification,
   showLogin,
   showMfaChallenge,
   showRegister,
+  showVerificationPending,
+  verifyEmail,
   verifyMfaChallenge,
   verifyRecoveryChallenge,
 } from './auth.controller.js';
@@ -22,6 +25,7 @@ import {
   normalizeEmail,
   recoveryCodeSchema,
   registerSchema,
+  resendVerificationSchema,
 } from './auth.schemas.js';
 import { validateAuthForm } from './auth.validation.js';
 
@@ -42,6 +46,19 @@ const registrationLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
   limit: 3,
   store: new PostgresRateLimitStore({ scope: 'auth.register.ip' }),
+});
+
+const verificationResendIpLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 5,
+  store: new PostgresRateLimitStore({ scope: 'auth.verify-email.resend.ip' }),
+});
+
+const verificationResendEmailLimiter = createRateLimiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 3,
+  keyGenerator: (request) => normalizeEmail(request.body?.email),
+  store: new PostgresRateLimitStore({ scope: 'auth.verify-email.resend.account' }),
 });
 
 const mfaLimiter = createRateLimiter({
@@ -67,6 +84,23 @@ authRouter.post(
   }),
   asyncHandler(register),
 );
+
+authRouter.get('/verify-email/pending', requireGuest, exposeCsrfToken, asyncHandler(showVerificationPending));
+authRouter.post(
+  '/verify-email/resend',
+  requireGuest,
+  exposeCsrfToken,
+  verifyCsrfToken,
+  verificationResendIpLimiter,
+  verificationResendEmailLimiter,
+  validateAuthForm({
+    schema: resendVerificationSchema,
+    view: 'auth/verify-email-pending',
+    pageTitle: 'Verifica tu correo',
+  }),
+  asyncHandler(resendVerification),
+);
+authRouter.get('/verify-email', requireGuest, asyncHandler(verifyEmail));
 
 authRouter.get('/login', requireGuest, exposeCsrfToken, showLogin);
 authRouter.post(
