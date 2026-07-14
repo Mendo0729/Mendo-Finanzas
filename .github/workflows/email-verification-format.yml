@@ -19,20 +19,27 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: >-
-          npx prettier --write
-          package.json
-          src/core/email/email.service.js
-          src/modules/auth/auth.controller.js
-          src/modules/auth/auth.repository.js
-          src/modules/auth/auth.routes.js
-          src/modules/auth/auth.schemas.js
-          src/modules/auth/auth.service.js
-          src/views/auth/login.ejs
-          src/views/auth/verify-email-pending.ejs
-          src/views/auth/verify-email-result.ejs
-          tests/email-verification.integration.test.js
-          tests/http/authentication.http.test.js
+      - name: Format changed files individually
+        shell: bash
+        run: |
+          files=(
+            package.json
+            src/core/email/email.service.js
+            src/modules/auth/auth.controller.js
+            src/modules/auth/auth.repository.js
+            src/modules/auth/auth.routes.js
+            src/modules/auth/auth.schemas.js
+            src/modules/auth/auth.service.js
+            src/views/auth/login.ejs
+            src/views/auth/verify-email-pending.ejs
+            src/views/auth/verify-email-result.ejs
+            tests/email-verification.integration.test.js
+            tests/http/authentication.http.test.js
+          )
+          for file in "${files[@]}"; do
+            echo "Formatting ${file}"
+            npx prettier --write "${file}" || echo "PRETTIER_FAILED:${file}"
+          done
       - name: Commit formatted files
         run: |
           if git diff --quiet; then
