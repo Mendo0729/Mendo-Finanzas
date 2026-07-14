@@ -82,23 +82,27 @@ export function createRateLimiter({
     throw new TypeError('windowMs y limit deben ser enteros positivos.');
   }
 
-  return function rateLimitMiddleware(request, response, next) {
-    const generatedKey = keyGenerator(request);
-    const key = String(generatedKey ?? request.ip ?? 'unknown').slice(0, MAX_KEY_LENGTH);
-    const entry = store.consume(key, windowMs);
-    const remaining = Math.max(0, limit - entry.count);
-    const resetSeconds = Math.max(1, Math.ceil((entry.resetAt - Date.now()) / 1000));
+  return async function rateLimitMiddleware(request, response, next) {
+    try {
+      const generatedKey = keyGenerator(request);
+      const key = String(generatedKey ?? request.ip ?? 'unknown').slice(0, MAX_KEY_LENGTH);
+      const entry = await store.consume(key, windowMs);
+      const remaining = Math.max(0, limit - entry.count);
+      const resetSeconds = Math.max(1, Math.ceil((entry.resetAt - Date.now()) / 1000));
 
-    response.setHeader('RateLimit-Limit', String(limit));
-    response.setHeader('RateLimit-Remaining', String(remaining));
-    response.setHeader('RateLimit-Reset', String(resetSeconds));
+      response.setHeader('RateLimit-Limit', String(limit));
+      response.setHeader('RateLimit-Remaining', String(remaining));
+      response.setHeader('RateLimit-Reset', String(resetSeconds));
 
-    if (entry.count > limit) {
-      response.setHeader('Retry-After', String(resetSeconds));
-      next(new RateLimitError(message));
-      return;
+      if (entry.count > limit) {
+        response.setHeader('Retry-After', String(resetSeconds));
+        next(new RateLimitError(message));
+        return;
+      }
+
+      next();
+    } catch (error) {
+      next(error);
     }
-
-    next();
   };
 }
