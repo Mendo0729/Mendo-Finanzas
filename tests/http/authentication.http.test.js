@@ -5,6 +5,8 @@ import { app } from '../../src/app.js';
 import { prisma } from '../../src/config/database.js';
 import {
   clearTestEmailOutbox,
+  disableTestEmailOutbox,
+  enableTestEmailOutbox,
   readTestEmailOutbox,
 } from '../../src/core/email/email.service.js';
 
@@ -50,7 +52,7 @@ async function request(path, { cookie, form, method = 'GET', redirect = 'manual'
 }
 
 before(async () => {
-  clearTestEmailOutbox();
+  enableTestEmailOutbox();
   await prisma.rateLimitBucket.deleteMany();
   await prisma.session.deleteMany();
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
@@ -72,6 +74,7 @@ after(async () => {
   await new Promise((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve()));
   });
+  disableTestEmailOutbox();
   await prisma.$disconnect();
 });
 
