@@ -45,7 +45,10 @@ test('GET / devuelve la página inicial y encabezados de seguridad', async () =>
   assert.match(response.headers.get('x-request-id'), /^[A-Za-z0-9._-]{8,100}$/);
   assert.equal(response.headers.get('x-powered-by'), null);
   assert.match(contentSecurityPolicy, /script-src 'self'/);
-  assert.doesNotMatch(contentSecurityPolicy, /script-src 'self' https:\/\/cdn\.jsdelivr\.net/);
+  assert.doesNotMatch(
+    contentSecurityPolicy,
+    /script-src 'self' https:\/\/cdn\.jsdelivr\.net/,
+  );
 });
 
 test('GET /health devuelve el estado de aplicación y base de datos', async () => {
@@ -60,16 +63,19 @@ test('GET /health devuelve el estado de aplicación y base de datos', async () =
   assert.ok(body.timestamp);
 });
 
-test('una ruta inexistente devuelve 404 sin exponer detalles internos ni parámetros', async () => {
-  const response = await fetch(`${baseUrl}/ruta-inexistente?token=secreto-no-visible`);
-  const body = await response.text();
+test(
+  'una ruta inexistente devuelve 404 sin exponer detalles internos ni parámetros',
+  async () => {
+    const response = await fetch(`${baseUrl}/ruta-inexistente?token=secreto-no-visible`);
+    const body = await response.text();
 
-  assert.equal(response.status, 404);
-  assert.match(body, /Página no encontrada/);
-  assert.match(body, /\/ruta-inexistente/);
-  assert.doesNotMatch(body, /secreto-no-visible/);
-  assert.doesNotMatch(body, /PrismaClient/);
-});
+    assert.equal(response.status, 404);
+    assert.match(body, /Página no encontrada/);
+    assert.match(body, /\/ruta-inexistente/);
+    assert.doesNotMatch(body, /secreto-no-visible/);
+    assert.doesNotMatch(body, /PrismaClient/);
+  },
+);
 
 test('los errores asíncronos llegan al manejador central y devuelven JSON seguro', async () => {
   const testApp = express();
