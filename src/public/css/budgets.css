@@ -100,6 +100,10 @@
   box-shadow: 0 0 0 4px rgb(10 170 115 / 14%);
 }
 
+.mf-metrics-grid + .mf-data-table-wrap {
+  margin-top: 24px;
+}
+
 @media (max-width: 1280px) {
   .mf-page-intro:has(.mf-table-actions input[type='month']) {
     align-items: flex-start;
@@ -121,6 +125,10 @@
 
   .mf-page-intro > .mf-table-actions:has(input[type='month']) > a {
     width: 100%;
+  }
+
+  .mf-metrics-grid + .mf-data-table-wrap {
+    margin-top: 20px;
   }
 }
 
