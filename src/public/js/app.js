@@ -43,30 +43,79 @@ function initializeBarChart() {
   const chart = document.querySelector('[data-monthly-series]');
   if (!chart) return;
 
-  const series = JSON.parse(chart.dataset.monthlySeries || '[]');
-  const maximum = Math.max(1, ...series.flatMap((item) => [item.income, item.expense]));
+  const fullSeries = JSON.parse(chart.dataset.monthlySeries || '[]');
+  const currency = chart.dataset.currency || 'USD';
+  const defaultPeriod = Number(chart.dataset.defaultPeriod || 6);
+  const periodLabel = document.querySelector('[data-chart-period-label]');
+  const periodButtons = [...document.querySelectorAll('[data-chart-period]')];
+  const scrollContainer = chart.closest('.mf-bar-chart-scroll');
+  const allowedPeriods = new Set([3, 6, 12]);
 
-  for (const item of series) {
-    const group = document.createElement('div');
-    group.className = 'mf-bar-group';
+  const render = (requestedPeriod) => {
+    const period = allowedPeriods.has(Number(requestedPeriod)) ? Number(requestedPeriod) : 6;
+    const series = fullSeries.slice(-period);
+    const maximum = Math.max(
+      1,
+      ...series.flatMap((item) => [Number(item.income), Number(item.expense)]),
+    );
 
-    const income = document.createElement('div');
-    income.className = 'mf-bar mf-bar--income';
-    income.style.height = `${Math.max(2, (item.income / maximum) * 100)}%`;
-    income.title = `${item.label}: ingresos ${formatCurrency(item.income, 'USD')}`;
+    chart.replaceChildren();
+    chart.dataset.period = String(period);
+    chart.style.setProperty('--mf-chart-columns', String(period));
+    chart.style.setProperty(
+      '--mf-chart-min-width',
+      period === 12 ? '720px' : period === 6 ? '420px' : '280px',
+    );
 
-    const expense = document.createElement('div');
-    expense.className = 'mf-bar mf-bar--expense';
-    expense.style.height = `${Math.max(2, (item.expense / maximum) * 100)}%`;
-    expense.title = `${item.label}: gastos ${formatCurrency(item.expense, 'USD')}`;
+    for (const item of series) {
+      const group = document.createElement('div');
+      group.className = 'mf-bar-group';
 
-    const label = document.createElement('span');
-    label.className = 'mf-bar-label';
-    label.textContent = item.label;
+      const incomeValue = Number(item.income);
+      const expenseValue = Number(item.expense);
+      const periodName = item.year ? `${item.label} ${item.year}` : item.label;
 
-    group.append(income, expense, label);
-    chart.append(group);
-  }
+      const income = document.createElement('div');
+      income.className = 'mf-bar mf-bar--income';
+      income.style.height = `${Math.max(2, (incomeValue / maximum) * 100)}%`;
+      income.title = `${periodName}: ingresos ${formatCurrency(incomeValue, currency)}`;
+
+      const expense = document.createElement('div');
+      expense.className = 'mf-bar mf-bar--expense';
+      expense.style.height = `${Math.max(2, (expenseValue / maximum) * 100)}%`;
+      expense.title = `${periodName}: gastos ${formatCurrency(expenseValue, currency)}`;
+
+      const label = document.createElement('span');
+      label.className = 'mf-bar-label';
+      label.textContent = item.label;
+      label.title = periodName;
+
+      group.append(income, expense, label);
+      chart.append(group);
+    }
+
+    if (periodLabel) {
+      periodLabel.textContent = `Últimos ${period} meses`;
+    }
+
+    periodButtons.forEach((button) => {
+      const selected = Number(button.dataset.chartPeriod) === period;
+      button.classList.toggle('is-active', selected);
+      button.setAttribute('aria-pressed', String(selected));
+    });
+
+    if (scrollContainer) {
+      requestAnimationFrame(() => {
+        scrollContainer.scrollLeft = scrollContainer.scrollWidth;
+      });
+    }
+  };
+
+  periodButtons.forEach((button) => {
+    button.addEventListener('click', () => render(button.dataset.chartPeriod));
+  });
+
+  render(defaultPeriod);
 }
 
 function initializeCategoryChart() {

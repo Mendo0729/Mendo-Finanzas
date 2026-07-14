@@ -44,8 +44,8 @@ function percentageChange(current, previous) {
     .toNumber();
 }
 
-function buildMonthlySeries(transactions, startDate, locale = 'es-PA') {
-  const months = Array.from({ length: 6 }, (_, index) => addMonths(startDate, index));
+function buildMonthlySeries(transactions, startDate, monthCount = 12, locale = 'es-PA') {
+  const months = Array.from({ length: monthCount }, (_, index) => addMonths(startDate, index));
   const entries = new Map(
     months.map((date) => [
       `${date.getUTCFullYear()}-${date.getUTCMonth()}`,
@@ -77,6 +77,7 @@ function buildMonthlySeries(transactions, startDate, locale = 'es-PA') {
       label: new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' })
         .format(date)
         .replace('.', ''),
+      year: date.getUTCFullYear(),
       income: values.income.toFixed(2),
       expense: values.expense.toFixed(2),
     };
@@ -88,7 +89,7 @@ export async function getDashboardData(household) {
   const currentMonthStart = monthStart(now);
   const nextMonthStart = addMonths(currentMonthStart, 1);
   const previousMonthStart = addMonths(currentMonthStart, -1);
-  const historyStart = addMonths(currentMonthStart, -5);
+  const historyStart = addMonths(currentMonthStart, -11);
 
   const baseTransactionFilter = {
     householdId: household.id,
@@ -263,7 +264,7 @@ export async function getDashboardData(household) {
     expense: expense.toFixed(2),
     incomeChange: percentageChange(income, previousIncome),
     expenseChange: percentageChange(expense, previousExpense),
-    monthlySeries: buildMonthlySeries(historyTransactions, historyStart),
+    monthlySeries: buildMonthlySeries(historyTransactions, historyStart, 12),
     categoryExpenses,
     recentTransactions,
     budgetProgress,

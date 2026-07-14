@@ -107,21 +107,45 @@
 
             <section class="mf-analytics-grid">
               <article class="mf-panel mf-panel--wide">
-                <div class="mf-panel__header">
+                <div class="mf-panel__header mf-chart-panel-header">
                   <div>
-                    <p class="mf-eyebrow">Últimos seis meses</p>
+                    <p class="mf-eyebrow" data-chart-period-label aria-live="polite">
+                      Últimos 6 meses
+                    </p>
                     <h2>Ingresos y gastos</h2>
                   </div>
-                  <div class="mf-chart-legend" aria-label="Leyenda">
-                    <span><i class="is-income"></i> Ingresos</span>
-                    <span><i class="is-expense"></i> Gastos</span>
+                  <div class="mf-chart-header-actions">
+                    <div class="mf-chart-period" role="group" aria-label="Periodo de la gráfica">
+                      <button type="button" data-chart-period="3" aria-pressed="false">
+                        3 meses
+                      </button>
+                      <button
+                        class="is-active"
+                        type="button"
+                        data-chart-period="6"
+                        aria-pressed="true"
+                      >
+                        6 meses
+                      </button>
+                      <button type="button" data-chart-period="12" aria-pressed="false">
+                        12 meses
+                      </button>
+                    </div>
+                    <div class="mf-chart-legend" aria-label="Leyenda">
+                      <span><i class="is-income"></i> Ingresos</span>
+                      <span><i class="is-expense"></i> Gastos</span>
+                    </div>
                   </div>
                 </div>
-                <div
-                  class="mf-bar-chart"
-                  data-monthly-series='<%- JSON.stringify(dashboard.monthlySeries) %>'
-                  aria-label="Gráfica de ingresos y gastos"
-                ></div>
+                <div class="mf-bar-chart-scroll">
+                  <div
+                    class="mf-bar-chart"
+                    data-monthly-series='<%- JSON.stringify(dashboard.monthlySeries) %>'
+                    data-currency="<%= dashboard.currency %>"
+                    data-default-period="6"
+                    aria-label="Gráfica de ingresos y gastos"
+                  ></div>
+                </div>
               </article>
 
               <article class="mf-panel">
