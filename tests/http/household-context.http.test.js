@@ -90,6 +90,7 @@ before(async () => {
         passwordHash,
         status: 1,
         emailVerifiedAt: new Date(),
+        emailVerifiedAt: new Date(),
       },
     }),
     prisma.user.create({
@@ -98,6 +99,7 @@ before(async () => {
         email: OUTSIDER_EMAIL,
         passwordHash,
         status: 1,
+        emailVerifiedAt: new Date(),
         emailVerifiedAt: new Date(),
       },
     }),
