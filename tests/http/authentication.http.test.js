@@ -37,6 +37,7 @@ async function request(path, { cookie, form, method = 'GET', redirect = 'manual'
 }
 
 before(async () => {
+  await prisma.rateLimitBucket.deleteMany();
   await prisma.session.deleteMany();
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
 
@@ -49,6 +50,7 @@ before(async () => {
 });
 
 after(async () => {
+  await prisma.rateLimitBucket.deleteMany();
   await prisma.session.deleteMany();
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
 

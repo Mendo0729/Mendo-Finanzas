@@ -72,3 +72,20 @@ test('acota claves generadas por datos enviados por el cliente', async () => {
   const [storedKey] = store.entries.keys();
   assert.equal(storedKey.length, 512);
 });
+
+test('espera stores asíncronos y propaga sus errores', async () => {
+  const expectedError = new Error('base no disponible');
+  const limiter = createRateLimiter({
+    windowMs: 60_000,
+    limit: 2,
+    store: {
+      async consume() {
+        throw expectedError;
+      },
+    },
+  });
+
+  const result = await runMiddleware(limiter);
+
+  assert.equal(result.error, expectedError);
+});
