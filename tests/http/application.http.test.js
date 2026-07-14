@@ -35,13 +35,17 @@ after(async () => {
   await prisma.$disconnect();
 });
 
-test('GET / devuelve la página inicial y un request ID', async () => {
+test('GET / devuelve la página inicial y encabezados de seguridad', async () => {
   const response = await fetch(`${baseUrl}/`);
   const body = await response.text();
+  const contentSecurityPolicy = response.headers.get('content-security-policy') ?? '';
 
   assert.equal(response.status, 200);
   assert.match(body, /Mendo Finanzas/);
   assert.match(response.headers.get('x-request-id'), /^[A-Za-z0-9._-]{8,100}$/);
+  assert.equal(response.headers.get('x-powered-by'), null);
+  assert.match(contentSecurityPolicy, /script-src 'self'/);
+  assert.doesNotMatch(contentSecurityPolicy, /script-src 'self' https:\/\/cdn\.jsdelivr\.net/);
 });
 
 test('GET /health devuelve el estado de aplicación y base de datos', async () => {
@@ -56,12 +60,14 @@ test('GET /health devuelve el estado de aplicación y base de datos', async () =
   assert.ok(body.timestamp);
 });
 
-test('una ruta inexistente devuelve 404 sin exponer detalles internos', async () => {
-  const response = await fetch(`${baseUrl}/ruta-inexistente`);
+test('una ruta inexistente devuelve 404 sin exponer detalles internos ni parámetros', async () => {
+  const response = await fetch(`${baseUrl}/ruta-inexistente?token=secreto-no-visible`);
   const body = await response.text();
 
   assert.equal(response.status, 404);
   assert.match(body, /Página no encontrada/);
+  assert.match(body, /\/ruta-inexistente/);
+  assert.doesNotMatch(body, /secreto-no-visible/);
   assert.doesNotMatch(body, /PrismaClient/);
 });
 

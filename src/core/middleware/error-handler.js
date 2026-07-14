@@ -23,10 +23,11 @@ export function errorHandler(error, request, response, next) {
 
   const appError = normalizeError(error);
   const requestId = request.context?.requestId ?? response.locals.requestId ?? null;
+  const requestPath = request.path;
   const logContext = {
     requestId,
     method: request.method,
-    path: request.originalUrl,
+    path: requestPath,
     statusCode: appError.statusCode,
     code: appError.code,
     error,
@@ -55,7 +56,7 @@ export function errorHandler(error, request, response, next) {
   if (appError.statusCode === 404) {
     response.status(404).render('errors/404', {
       pageTitle: 'Página no encontrada',
-      requestedPath: request.originalUrl,
+      requestedPath: requestPath,
       requestId,
     });
     return;

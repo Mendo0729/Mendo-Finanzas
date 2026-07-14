@@ -23,6 +23,14 @@ function decimal(value = 0) {
   return new Prisma.Decimal(value ?? 0);
 }
 
+function escapeDataAttributeText(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll("'", '&#39;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;');
+}
+
 function percentageChange(current, previous) {
   if (previous.isZero()) {
     return null;
@@ -204,8 +212,8 @@ export async function getDashboardData(household) {
     const category = categoryMap.get(row.categoryId.toString());
 
     return {
-      name: category?.name ?? 'Sin categoría',
-      icon: category?.icon ?? null,
+      name: escapeDataAttributeText(category?.name ?? 'Sin categoría'),
+      icon: category?.icon ? escapeDataAttributeText(category.icon) : null,
       amount: decimal(row._sum.amount).toFixed(2),
     };
   });

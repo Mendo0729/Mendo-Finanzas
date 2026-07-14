@@ -3,6 +3,7 @@ import express from 'express';
 import helmet from 'helmet';
 
 import { createSessionMiddleware } from '../config/session.js';
+import { preventSensitiveResponseCaching } from '../core/middleware/cache-control.js';
 import { requestContext } from '../core/middleware/request-context.js';
 import { exposeAuthenticatedCsrfToken } from '../core/security/csrf.js';
 import { loadCurrentUser } from '../modules/auth/auth.middleware.js';
@@ -26,7 +27,7 @@ export function registerMiddlewares(app, { publicDirectory }) {
         directives: {
           defaultSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net'],
-          scriptSrc: ["'self'", 'https://cdn.jsdelivr.net'],
+          scriptSrc: ["'self'"],
           imgSrc: ["'self'", 'data:'],
           fontSrc: ["'self'", 'https://cdn.jsdelivr.net'],
           connectSrc: ["'self'"],
@@ -40,6 +41,7 @@ export function registerMiddlewares(app, { publicDirectory }) {
   app.use(express.json({ limit: '100kb' }));
   app.use(createSessionMiddleware());
   app.use(loadCurrentUser);
+  app.use(preventSensitiveResponseCaching);
   app.use(loadHouseholdContext);
   app.use(exposeAuthenticatedCsrfToken);
 }

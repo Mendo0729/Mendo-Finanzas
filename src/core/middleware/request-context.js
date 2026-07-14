@@ -32,7 +32,7 @@ export function requestContext(request, response, next) {
     logger.info('Solicitud HTTP completada.', {
       requestId,
       method: request.method,
-      path: request.originalUrl,
+      path: request.path,
       statusCode: response.statusCode,
       durationMs: Number(durationMs.toFixed(2)),
     });

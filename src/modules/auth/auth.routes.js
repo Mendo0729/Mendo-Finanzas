@@ -24,6 +24,11 @@ import {
 } from './auth.schemas.js';
 import { validateAuthForm } from './auth.validation.js';
 
+const loginIpLimiter = createRateLimiter({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+});
+
 const loginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 5,
@@ -64,6 +69,7 @@ authRouter.post(
   requireGuest,
   exposeCsrfToken,
   verifyCsrfToken,
+  loginIpLimiter,
   loginLimiter,
   validateAuthForm({
     schema: loginSchema,

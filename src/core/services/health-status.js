@@ -1,6 +1,10 @@
 import { checkDatabaseConnection } from '../../config/database.js';
 import { env } from '../../config/env.js';
 
+function environmentDetails() {
+  return env.isProduction ? {} : { environment: env.nodeEnv };
+}
+
 export async function getHealthStatus() {
   try {
     await checkDatabaseConnection();
@@ -9,7 +13,7 @@ export async function getHealthStatus() {
       httpStatus: 200,
       status: 'ok',
       database: 'up',
-      environment: env.nodeEnv,
+      ...environmentDetails(),
       timestamp: new Date().toISOString(),
     };
   } catch {
@@ -17,7 +21,7 @@ export async function getHealthStatus() {
       httpStatus: 503,
       status: 'degraded',
       database: 'down',
-      environment: env.nodeEnv,
+      ...environmentDetails(),
       timestamp: new Date().toISOString(),
     };
   }
