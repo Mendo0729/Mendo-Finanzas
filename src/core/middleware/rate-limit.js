@@ -43,10 +43,7 @@ export class MemoryRateLimitStore {
     const now = this.now();
     this.operations += 1;
 
-    if (
-      this.operations % this.cleanupInterval === 0 ||
-      this.entries.size >= this.maxEntries
-    ) {
+    if (this.operations % this.cleanupInterval === 0 || this.entries.size >= this.maxEntries) {
       this.pruneExpired(now);
     }
 
@@ -81,12 +78,7 @@ export function createRateLimiter({
   message = 'Demasiados intentos. Espera antes de volver a intentarlo.',
   store = new MemoryRateLimitStore(),
 }) {
-  if (
-    !Number.isInteger(windowMs) ||
-    windowMs <= 0 ||
-    !Number.isInteger(limit) ||
-    limit <= 0
-  ) {
+  if (!Number.isInteger(windowMs) || windowMs <= 0 || !Number.isInteger(limit) || limit <= 0) {
     throw new TypeError('windowMs y limit deben ser enteros positivos.');
   }
 
