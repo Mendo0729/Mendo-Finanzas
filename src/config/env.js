@@ -6,9 +6,7 @@ const insecureProductionSessionSecrets = new Set([
   'change_this_with_a_random_secret_of_at_least_32_characters',
   'ci_only_session_secret_with_at_least_32_characters',
 ]);
-const insecureProductionMfaKeys = new Set([
-  'MDEyMzQ1Njc4OUFCQ0RFRjAxMjM0NTY3ODlBQkNERUY=',
-]);
+const insecureProductionMfaKeys = new Set(['MDEyMzQ1Njc4OUFCQ0RFRjAxMjM0NTY3ODlBQkNERUY=']);
 
 for (const variableName of requiredVariables) {
   if (!process.env[variableName]) {
