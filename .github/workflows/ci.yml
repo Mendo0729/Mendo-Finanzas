@@ -97,7 +97,7 @@ jobs:
           grep -q '"database":"up"' health.json
 
           curl --fail --silent --show-error http://127.0.0.1:3000/ > home.html
-          grep -q 'Mendo Finanzas' home.html
+          grep -q 'SharedWallet' home.html
 
           curl --fail --silent --show-error http://127.0.0.1:3000/auth/login > login.html
           grep -q 'Iniciar sesión' login.html
