@@ -38,6 +38,21 @@
   height: 100%;
 }
 
+.mf-panel--wide {
+  overflow: hidden;
+}
+
+.mf-panel--wide .mf-bar-chart {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: 32px;
+  padding-inline: 12px;
+}
+
+.mf-panel--wide .mf-bar-label {
+  bottom: -27px;
+}
+
 .mf-category-chart {
   grid-template-columns: minmax(130px, 150px) minmax(0, 1fr);
 }
@@ -80,6 +95,11 @@
 }
 
 @media (max-width: 520px) {
+  .mf-panel--wide .mf-bar-chart {
+    margin-bottom: 34px;
+    padding-inline: 4px;
+  }
+
   .mf-category-chart {
     grid-template-columns: 1fr;
     justify-items: center;
