@@ -10,11 +10,7 @@ export function hashRateLimitKey(key) {
 }
 
 export class PostgresRateLimitStore {
-  constructor({
-    database = prisma,
-    scope,
-    cleanupInterval = DEFAULT_CLEANUP_INTERVAL,
-  } = {}) {
+  constructor({ database = prisma, scope, cleanupInterval = DEFAULT_CLEANUP_INTERVAL } = {}) {
     if (!SCOPE_PATTERN.test(scope ?? '')) {
       throw new TypeError('scope debe contener entre 1 y 80 caracteres seguros.');
     }
