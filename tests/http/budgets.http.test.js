@@ -107,6 +107,7 @@ before(async () => {
           email: `budgets-${key}-${suffix}@test.local`,
           passwordHash,
           status: 1,
+          emailVerifiedAt: new Date(),
         },
       }),
     ),
@@ -117,6 +118,7 @@ before(async () => {
       email: outsiderEmail,
       passwordHash,
       status: 1,
+      emailVerifiedAt: new Date(),
     },
   });
 
