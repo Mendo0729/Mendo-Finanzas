@@ -1,0 +1,49 @@
+name: Email verification format
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  prettier:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: >-
+          npx prettier --write
+          package.json
+          src/core/email/email.service.js
+          src/modules/auth/auth.controller.js
+          src/modules/auth/auth.repository.js
+          src/modules/auth/auth.routes.js
+          src/modules/auth/auth.schemas.js
+          src/modules/auth/auth.service.js
+          src/views/auth/login.ejs
+          src/views/auth/verify-email-pending.ejs
+          src/views/auth/verify-email-result.ejs
+          tests/email-verification.integration.test.js
+          tests/http/authentication.http.test.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: email-verification-formatted-files
+          path: |
+            package.json
+            src/core/email/email.service.js
+            src/modules/auth/auth.controller.js
+            src/modules/auth/auth.repository.js
+            src/modules/auth/auth.routes.js
+            src/modules/auth/auth.schemas.js
+            src/modules/auth/auth.service.js
+            src/views/auth/login.ejs
+            src/views/auth/verify-email-pending.ejs
+            src/views/auth/verify-email-result.ejs
+            tests/email-verification.integration.test.js
+            tests/http/authentication.http.test.js
