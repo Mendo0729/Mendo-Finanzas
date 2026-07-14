@@ -4,7 +4,7 @@ import { env } from './config/env.js';
 import { logger } from './config/logger.js';
 
 const server = app.listen(env.port, () => {
-  logger.info('Mendo Finanzas inició correctamente.', {
+  logger.info('SharedWallet inició correctamente.', {
     appUrl: env.appUrl,
     environment: env.nodeEnv,
   });
