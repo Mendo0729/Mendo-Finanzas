@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { createRateLimiter } from '../../core/middleware/rate-limit.js';
 import { validate } from '../../core/middleware/validate.js';
 import { exposeCsrfToken, verifyCsrfToken } from '../../core/security/csrf.js';
+import { PostgresRateLimitStore } from '../../core/security/postgres-rate-limit-store.js';
 import { asyncHandler } from '../../core/utils/async-handler.js';
 import {
   login,
@@ -27,23 +28,27 @@ import { validateAuthForm } from './auth.validation.js';
 const loginIpLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 20,
+  store: new PostgresRateLimitStore({ scope: 'auth.login.ip' }),
 });
 
 const loginLimiter = createRateLimiter({
   windowMs: 15 * 60 * 1000,
   limit: 5,
   keyGenerator: (request) => `${request.ip}:${normalizeEmail(request.body?.email)}`,
+  store: new PostgresRateLimitStore({ scope: 'auth.login.account' }),
 });
 
 const registrationLimiter = createRateLimiter({
   windowMs: 60 * 60 * 1000,
   limit: 3,
+  store: new PostgresRateLimitStore({ scope: 'auth.register.ip' }),
 });
 
 const mfaLimiter = createRateLimiter({
   windowMs: 10 * 60 * 1000,
   limit: 8,
   keyGenerator: (request) => `${request.ip}:${request.session?.pendingMfaUserId ?? 'none'}`,
+  store: new PostgresRateLimitStore({ scope: 'auth.mfa.challenge' }),
 });
 
 export const authRouter = Router();
