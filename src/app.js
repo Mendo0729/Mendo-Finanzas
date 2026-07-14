@@ -5,6 +5,7 @@ import express from 'express';
 
 import { registerMiddlewares } from './bootstrap/register-middlewares.js';
 import { registerRoutes } from './bootstrap/register-routes.js';
+import { env } from './config/env.js';
 import { errorHandler } from './core/middleware/error-handler.js';
 import { notFoundHandler } from './core/middleware/not-found.js';
 
@@ -15,7 +16,7 @@ export function createApp() {
   const app = express();
 
   app.disable('x-powered-by');
-  app.set('trust proxy', 1);
+  app.set('trust proxy', env.isProduction ? 1 : false);
   app.set('view engine', 'ejs');
   app.set('views', path.join(__dirname, 'views'));
 
