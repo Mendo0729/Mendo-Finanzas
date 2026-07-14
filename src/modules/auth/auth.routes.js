@@ -85,7 +85,12 @@ authRouter.post(
   asyncHandler(register),
 );
 
-authRouter.get('/verify-email/pending', requireGuest, exposeCsrfToken, asyncHandler(showVerificationPending));
+authRouter.get(
+  '/verify-email/pending',
+  requireGuest,
+  exposeCsrfToken,
+  asyncHandler(showVerificationPending),
+);
 authRouter.post(
   '/verify-email/resend',
   requireGuest,
