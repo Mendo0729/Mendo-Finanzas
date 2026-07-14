@@ -112,6 +112,8 @@ before(async () => {
           email: `transactions-${key}-${suffix}@test.local`,
           passwordHash,
           status: 1,
+          emailVerifiedAt: new Date(),
+          emailVerifiedAt: new Date(),
         },
       }),
     ),
@@ -122,6 +124,8 @@ before(async () => {
       email: outsiderEmail,
       passwordHash,
       status: 1,
+      emailVerifiedAt: new Date(),
+      emailVerifiedAt: new Date(),
     },
   });
 

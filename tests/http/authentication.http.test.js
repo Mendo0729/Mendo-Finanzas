@@ -3,6 +3,12 @@ import { after, before, test } from 'node:test';
 
 import { app } from '../../src/app.js';
 import { prisma } from '../../src/config/database.js';
+import {
+  clearTestEmailOutbox,
+  disableTestEmailOutbox,
+  enableTestEmailOutbox,
+  readTestEmailOutbox,
+} from '../../src/core/email/email.service.js';
 
 const TEST_EMAIL = `auth-${Date.now()}@mendofinanzas.local`;
 const TEST_PASSWORD = 'Frase de contraseña segura 2026';
@@ -18,6 +24,15 @@ function extractCsrfToken(html) {
   const match = html.match(/name="_csrf" value="([^"]+)"/);
   assert.ok(match, 'La página debe incluir un token CSRF.');
   return match[1];
+}
+
+function verificationTokenFromOutbox() {
+  const messages = readTestEmailOutbox();
+  assert.equal(messages.length, 1);
+  const verificationUrl = new URL(messages[0].verificationUrl);
+  const token = verificationUrl.searchParams.get('token');
+  assert.ok(token);
+  return token;
 }
 
 async function request(path, { cookie, form, method = 'GET', redirect = 'manual' } = {}) {
@@ -37,6 +52,7 @@ async function request(path, { cookie, form, method = 'GET', redirect = 'manual'
 }
 
 before(async () => {
+  enableTestEmailOutbox();
   await prisma.rateLimitBucket.deleteMany();
   await prisma.session.deleteMany();
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
@@ -50,6 +66,7 @@ before(async () => {
 });
 
 after(async () => {
+  clearTestEmailOutbox();
   await prisma.rateLimitBucket.deleteMany();
   await prisma.session.deleteMany();
   await prisma.user.deleteMany({ where: { email: TEST_EMAIL } });
@@ -57,10 +74,11 @@ after(async () => {
   await new Promise((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve()));
   });
+  disableTestEmailOutbox();
   await prisma.$disconnect();
 });
 
-test('el registro requiere CSRF, guarda Argon2id y crea una sesión PostgreSQL', async () => {
+test('el registro exige verificar el correo antes de crear una sesión autenticada', async () => {
   const registerPage = await request('/auth/register');
   const registerHtml = await registerPage.text();
   let cookie = parseCookie(registerPage.headers.get('set-cookie'));
@@ -95,33 +113,56 @@ test('el registro requiere CSRF, guarda Argon2id y crea una sesión PostgreSQL',
   });
 
   assert.equal(registered.status, 303);
-  assert.equal(registered.headers.get('location'), '/');
+  assert.equal(registered.headers.get('location'), '/auth/verify-email/pending');
   cookie = parseCookie(registered.headers.get('set-cookie')) ?? cookie;
 
   const user = await prisma.user.findUnique({ where: { email: TEST_EMAIL } });
   assert.ok(user);
+  assert.equal(user.emailVerifiedAt, null);
   assert.match(user.passwordHash, /^\$argon2id\$/);
   assert.notEqual(user.passwordHash, TEST_PASSWORD);
 
-  const sessions = await prisma.session.findMany();
-  assert.equal(sessions.length, 1);
-  assert.equal(sessions[0].sess.userId, user.id.toString());
+  const verificationToken = await prisma.authToken.findFirstOrThrow({
+    where: { userId: user.id, tokenType: 1 },
+  });
+  assert.equal(verificationToken.tokenHash.length, 64);
+  assert.equal(verificationToken.usedAt, null);
+  const remainingMs = verificationToken.expiresAt.getTime() - Date.now();
+  assert.ok(remainingMs > 29 * 60 * 1000 && remainingMs <= 30 * 60 * 1000);
 
-  const authenticatedHome = await request('/', { cookie });
-  const authenticatedHtml = await authenticatedHome.text();
-  assert.equal(authenticatedHome.headers.get('cache-control'), 'no-store');
-  assert.match(authenticatedHtml, /Usuario de prueba/);
+  const guestSessions = await prisma.session.findMany();
+  assert.equal(guestSessions.length, 1);
+  assert.equal(guestSessions[0].sess.userId, undefined);
 
-  const logoutToken = extractCsrfToken(authenticatedHtml);
-  const loggedOut = await request('/auth/logout', {
+  const loginPage = await request('/auth/login', { cookie });
+  const loginToken = extractCsrfToken(await loginPage.text());
+  const unverifiedLogin = await request('/auth/login', {
     method: 'POST',
     cookie,
-    form: { _csrf: logoutToken },
+    form: {
+      _csrf: loginToken,
+      email: TEST_EMAIL,
+      password: TEST_PASSWORD,
+    },
   });
-  assert.equal(loggedOut.status, 303);
+  assert.equal(unverifiedLogin.status, 303);
+  assert.equal(unverifiedLogin.headers.get('location'), '/auth/verify-email/pending');
 
-  const anonymousHome = await request('/', { cookie });
-  assert.doesNotMatch(await anonymousHome.text(), /Sesión activa como/);
+  const rawToken = verificationTokenFromOutbox();
+  assert.notEqual(verificationToken.tokenHash, rawToken);
+  const verified = await request(`/auth/verify-email?token=${encodeURIComponent(rawToken)}`, {
+    cookie,
+  });
+  const verifiedHtml = await verified.text();
+  assert.equal(verified.status, 200);
+  assert.match(verifiedHtml, /Correo verificado/);
+
+  const verifiedUser = await prisma.user.findUniqueOrThrow({ where: { email: TEST_EMAIL } });
+  assert.ok(verifiedUser.emailVerifiedAt);
+  const consumedToken = await prisma.authToken.findUniqueOrThrow({
+    where: { id: verificationToken.id },
+  });
+  assert.ok(consumedToken.usedAt);
 });
 
 test('el login usa un mensaje genérico y regenera la sesión al autenticar', async () => {

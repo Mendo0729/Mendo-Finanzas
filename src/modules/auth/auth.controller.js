@@ -5,6 +5,8 @@ import * as securityService from '../security/security.service.js';
 import * as authService from './auth.service.js';
 
 const MFA_CHALLENGE_TTL_MS = 5 * 60 * 1000;
+const VERIFICATION_RESEND_NOTICE =
+  'Si existe una cuenta pendiente de verificación, enviaremos un nuevo enlace.';
 
 function emptyFormState() {
   return {
@@ -21,6 +23,14 @@ function pendingMfaUserId(request) {
     return null;
   }
   return userId;
+}
+
+async function rememberPendingVerification(request, email, notice = null) {
+  request.session.pendingVerificationEmail = email;
+  if (notice) {
+    request.session.pendingVerificationNotice = notice;
+  }
+  await saveSession(request);
 }
 
 async function establishAuthenticatedSession(request, user) {
@@ -45,6 +55,22 @@ export function showLogin(_request, response) {
   response.render('auth/login', { pageTitle: 'Iniciar sesión', ...emptyFormState() });
 }
 
+export async function showVerificationPending(request, response) {
+  const notice = request.session?.pendingVerificationNotice ?? null;
+  if (request.session?.pendingVerificationNotice) {
+    delete request.session.pendingVerificationNotice;
+    await saveSession(request);
+  }
+
+  response.render('auth/verify-email-pending', {
+    pageTitle: 'Verifica tu correo',
+    values: { name: '', email: request.session?.pendingVerificationEmail ?? '' },
+    fieldErrors: {},
+    formError: null,
+    notice,
+  });
+}
+
 export function showMfaChallenge(request, response) {
   if (!pendingMfaUserId(request)) {
     response.redirect(303, '/auth/login');
@@ -60,8 +86,8 @@ export function showMfaChallenge(request, response) {
 export async function register(request, response, next) {
   try {
     const user = await authService.registerUser(request.validated.body);
-    await establishAuthenticatedSession(request, user);
-    response.redirect(303, '/');
+    await rememberPendingVerification(request, user.email);
+    response.redirect(303, '/auth/verify-email/pending');
   } catch (error) {
     if (error instanceof ConflictError) {
       response.status(error.statusCode).render('auth/register', {
@@ -69,6 +95,41 @@ export async function register(request, response, next) {
         values: { name: request.validated.body.name, email: request.validated.body.email },
         fieldErrors: { email: error.message },
         formError: null,
+      });
+      return;
+    }
+    next(error);
+  }
+}
+
+export async function resendVerification(request, response, next) {
+  try {
+    const { email } = request.validated.body;
+    await authService.resendEmailVerification(email);
+    await rememberPendingVerification(request, email, VERIFICATION_RESEND_NOTICE);
+    response.redirect(303, '/auth/verify-email/pending');
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function verifyEmail(request, response, next) {
+  try {
+    await authService.verifyEmail(request.query?.token);
+    delete request.session.pendingVerificationEmail;
+    delete request.session.pendingVerificationNotice;
+    await saveSession(request);
+    response.render('auth/verify-email-result', {
+      pageTitle: 'Correo verificado',
+      verified: true,
+      message: 'Tu correo fue verificado correctamente. Ya puedes iniciar sesión.',
+    });
+  } catch (error) {
+    if (error?.code === 'EMAIL_VERIFICATION_INVALID') {
+      response.status(error.statusCode).render('auth/verify-email-result', {
+        pageTitle: 'Enlace no válido',
+        verified: false,
+        message: error.message,
       });
       return;
     }
@@ -90,6 +151,12 @@ export async function login(request, response, next) {
     response.redirect(303, '/');
   } catch (error) {
     if (error instanceof AuthenticationError) {
+      if (error.code === 'EMAIL_NOT_VERIFIED') {
+        await rememberPendingVerification(request, request.validated.body.email);
+        response.redirect(303, '/auth/verify-email/pending');
+        return;
+      }
+
       response.status(error.statusCode).render('auth/login', {
         pageTitle: 'Iniciar sesión',
         values: { name: '', email: request.validated.body.email },

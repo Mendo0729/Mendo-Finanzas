@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+  <%- include('../partials/head') %>
+  <body class="mf-auth-body">
+    <%- include('../partials/navbar') %>
+
+    <main class="mf-auth-main">
+      <div class="mf-auth-layout">
+        <section class="mf-auth-intro" aria-labelledby="verificationIntroTitle">
+          <span class="mf-auth-intro__eyebrow">Protección de tu cuenta</span>
+          <h1 id="verificationIntroTitle">Confirma que el correo te pertenece.</h1>
+          <p>
+            Antes de permitir el acceso, SharedWallet requiere verificar la dirección usada durante
+            el registro.
+          </p>
+          <ul class="mf-auth-features">
+            <li>El enlace es válido durante 30 minutos</li>
+            <li>Los enlaces anteriores se invalidan al solicitar uno nuevo</li>
+            <li>Tu sesión no se activa hasta completar la verificación</li>
+          </ul>
+        </section>
+
+        <section class="mf-auth-card" aria-labelledby="verificationTitle">
+          <div class="mf-auth-card__body">
+            <span class="mf-auth-card__badge">Verificación pendiente</span>
+            <h1 id="verificationTitle">Revisa tu correo</h1>
+            <p class="mf-auth-card__subtitle">
+              Enviamos un enlace de verificación. En desarrollo, el enlace aparece en la terminal
+              donde se ejecuta la aplicación.
+            </p>
+
+            <% if (typeof notice !== 'undefined' && notice) { %>
+              <div class="mf-auth-alert" role="status"><%= notice %></div>
+            <% } %>
+
+            <% if (formError) { %>
+              <div class="mf-auth-alert" role="alert"><%= formError %></div>
+            <% } %>
+
+            <form class="mf-auth-form" method="post" action="/auth/verify-email/resend" novalidate>
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+              <div class="mf-auth-field">
+                <label for="email">Correo electrónico</label>
+                <input
+                  class="mf-auth-input <%= fieldErrors.email ? 'is-invalid' : '' %>"
+                  id="email"
+                  name="email"
+                  type="email"
+                  maxlength="254"
+                  autocomplete="email"
+                  value="<%= values.email %>"
+                  required
+                />
+                <% if (fieldErrors.email) { %>
+                  <p class="mf-auth-error"><%= fieldErrors.email %></p>
+                <% } %>
+              </div>
+
+              <button class="mf-auth-submit" type="submit">Reenviar enlace</button>
+            </form>
+
+            <p class="mf-auth-switch">
+              ¿Ya verificaste tu correo? <a href="/auth/login">Iniciar sesión</a>
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <%- include('../partials/footer') %>
+  </body>
+</html>

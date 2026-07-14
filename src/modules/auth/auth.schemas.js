@@ -16,6 +16,16 @@ export function normalizeEmail(value) {
   return text(value).trim().toLowerCase();
 }
 
+function parseEmail(value) {
+  const email = normalizeEmail(value);
+  if (email.length > 254 || !EMAIL_PATTERN.test(email)) {
+    throw new FormSchemaError([
+      { path: ['email'], message: 'Ingresa un correo electrónico válido.' },
+    ]);
+  }
+  return email;
+}
+
 export const registerSchema = {
   parse(value) {
     const name = text(value?.name).trim().replace(/\s+/g, ' ');
@@ -67,6 +77,12 @@ export const loginSchema = {
 
     if (issues.length > 0) throw new FormSchemaError(issues);
     return { email, password };
+  },
+};
+
+export const resendVerificationSchema = {
+  parse(value) {
+    return { email: parseEmail(value?.email) };
   },
 };
 
