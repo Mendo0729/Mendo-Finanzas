@@ -2,9 +2,10 @@ import { env } from '../../config/env.js';
 import { logger } from '../../config/logger.js';
 
 const testOutbox = [];
+let captureForTests = false;
 
 export async function sendEmailVerification({ recipient, verificationUrl }) {
-  if (env.nodeEnv === 'test') {
+  if (captureForTests) {
     testOutbox.push({ recipient, verificationUrl });
     return;
   }
@@ -20,18 +21,20 @@ export async function sendEmailVerification({ recipient, verificationUrl }) {
   throw new Error('El proveedor de correo de producción todavía no está configurado.');
 }
 
-export function readTestEmailOutbox() {
-  if (env.nodeEnv !== 'test') {
-    throw new Error('El buzón de prueba solo está disponible con NODE_ENV=test.');
-  }
+export function enableTestEmailOutbox() {
+  captureForTests = true;
+  testOutbox.length = 0;
+}
 
+export function disableTestEmailOutbox() {
+  captureForTests = false;
+  testOutbox.length = 0;
+}
+
+export function readTestEmailOutbox() {
   return testOutbox.map((message) => ({ ...message }));
 }
 
 export function clearTestEmailOutbox() {
-  if (env.nodeEnv !== 'test') {
-    throw new Error('El buzón de prueba solo está disponible con NODE_ENV=test.');
-  }
-
   testOutbox.length = 0;
 }
