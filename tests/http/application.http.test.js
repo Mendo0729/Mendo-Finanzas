@@ -41,7 +41,7 @@ test('GET / devuelve la página inicial y encabezados de seguridad', async () =>
   const contentSecurityPolicy = response.headers.get('content-security-policy') ?? '';
 
   assert.equal(response.status, 200);
-  assert.match(body, /Mendo Finanzas/);
+  assert.match(body, /SharedWallet/);
   assert.match(response.headers.get('x-request-id'), /^[A-Za-z0-9._-]{8,100}$/);
   assert.equal(response.headers.get('x-powered-by'), null);
   assert.match(contentSecurityPolicy, /script-src 'self'/);
