@@ -17,4 +17,17 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts --no-audit --no-fund
-      - run: npx prettier --check .
+      - id: prettier
+        shell: bash
+        run: |
+          set +e
+          npx prettier --check . > prettier.txt 2>&1
+          status=$?
+          cat prettier.txt
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: format-diagnostic
+          path: prettier.txt
+      - if: steps.prettier.outputs.status != '0'
+        run: exit 1
