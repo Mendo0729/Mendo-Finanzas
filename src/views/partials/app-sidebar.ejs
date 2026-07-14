@@ -75,20 +75,20 @@
     </a>
   </nav>
 
-  <div class="mf-sidebar__profile">
-    <div class="mf-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
-    <div class="mf-profile-copy">
-      <strong><%= currentUser.name %></strong>
-      <span><%= currentHouseholdRole?.label ?? 'Usuario' %></span>
+  <div class="mf-sidebar__profile flex-column align-items-stretch gap-3">
+    <div class="d-flex align-items-center gap-2">
+      <div class="mf-avatar"><%= currentUser.name.charAt(0).toUpperCase() %></div>
+      <div class="mf-profile-copy">
+        <strong><%= currentUser.name %></strong>
+        <span><%= currentHouseholdRole?.label ?? 'Usuario' %></span>
+      </div>
     </div>
+
     <form method="post" action="/auth/logout">
       <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
-      <button
-        class="mf-icon-button mf-icon-button--sidebar"
-        type="submit"
-        aria-label="Cerrar sesión"
-      >
-        ↪
+      <button class="mf-button mf-button--danger-ghost w-100" type="submit">
+        <span aria-hidden="true">↪</span>
+        <span>Cerrar sesión</span>
       </button>
     </form>
   </div>
