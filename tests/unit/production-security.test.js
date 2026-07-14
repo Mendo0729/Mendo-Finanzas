@@ -13,11 +13,15 @@ const validProductionEnvironment = {
 };
 
 function runModule(modulePath, environment) {
-  return spawnSync(process.execPath, ['--input-type=module', '--eval', `await import('${modulePath}')`], {
-    cwd: process.cwd(),
-    env: environment,
-    encoding: 'utf8',
-  });
+  return spawnSync(
+    process.execPath,
+    ['--input-type=module', '--eval', `await import('${modulePath}')`],
+    {
+      cwd: process.cwd(),
+      env: environment,
+      encoding: 'utf8',
+    },
+  );
 }
 
 test('acepta una configuración productiva válida', () => {
