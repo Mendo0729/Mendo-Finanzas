@@ -1,22 +1,39 @@
 /* Security and MFA responsive components */
+.mf-setup-grid {
+  grid-template-columns: max-content minmax(0, 1fr);
+}
+
 .mf-qr-panel {
-  box-sizing: border-box;
+  width: fit-content;
   min-width: 0;
-  overflow: hidden;
+  max-width: none;
+  overflow: visible;
 }
 
 .mf-qr-panel svg {
   display: block;
-  width: min(100%, 280px);
-  max-width: 100%;
-  height: auto;
-  aspect-ratio: 1;
 }
 
 @media (max-width: 720px) {
+  .mf-setup-grid {
+    grid-template-columns: 1fr;
+  }
+
   .mf-qr-panel {
-    width: min(100%, 320px);
+    width: fit-content;
+    max-width: 100%;
     margin-inline: auto;
-    padding: clamp(14px, 5vw, 22px);
+    padding: 24px;
+  }
+}
+
+@media (max-width: 380px) {
+  .mf-qr-panel {
+    padding: 14px;
+  }
+
+  .mf-qr-panel svg {
+    max-width: calc(100vw - 56px);
+    height: auto;
   }
 }
