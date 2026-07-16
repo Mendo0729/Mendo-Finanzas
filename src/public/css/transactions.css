@@ -1,0 +1,143 @@
+/* Transaction filters */
+.mf-filter-panel {
+  overflow: hidden;
+  border: 1px solid var(--mf-border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: var(--mf-shadow);
+}
+
+.mf-filter-panel > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px 26px;
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+  transition: background 150ms ease;
+}
+
+.mf-filter-panel > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mf-filter-panel > summary:hover,
+.mf-filter-panel[open] > summary {
+  background: #fbfdfc;
+}
+
+.mf-filter-panel__heading {
+  min-width: 0;
+}
+
+.mf-filter-panel__heading h2,
+.mf-filter-panel__heading p {
+  margin: 0;
+}
+
+.mf-filter-panel__heading h2 {
+  font-size: 1.25rem;
+  font-weight: 780;
+  letter-spacing: -0.025em;
+}
+
+.mf-filter-panel__heading p {
+  margin-top: 5px;
+  color: var(--mf-muted);
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+
+.mf-filter-panel__controls {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.mf-filter-panel__status {
+  display: inline-flex;
+  min-height: 30px;
+  align-items: center;
+  padding: 0 11px;
+  border-radius: 999px;
+  color: #087553;
+  background: #dcf8ed;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.mf-filter-panel__toggle {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 9px;
+  padding: 0 13px;
+  border: 1px solid var(--mf-border);
+  border-radius: 10px;
+  color: #344054;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.mf-filter-panel__toggle-open {
+  display: none;
+}
+
+.mf-filter-panel[open] .mf-filter-panel__toggle-closed {
+  display: none;
+}
+
+.mf-filter-panel[open] .mf-filter-panel__toggle-open {
+  display: inline;
+}
+
+.mf-filter-panel__chevron {
+  display: inline-block;
+  font-size: 1rem;
+  line-height: 1;
+  transition: transform 160ms ease;
+}
+
+.mf-filter-panel[open] .mf-filter-panel__chevron {
+  transform: rotate(180deg);
+}
+
+.mf-filter-panel__body {
+  padding: 24px 26px 28px;
+  border-top: 1px solid var(--mf-border);
+}
+
+@media (max-width: 720px) {
+  .mf-filter-panel > summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .mf-filter-panel__controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .mf-filter-panel__body {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .mf-filter-panel__controls {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mf-filter-panel__toggle {
+    justify-content: space-between;
+  }
+}
