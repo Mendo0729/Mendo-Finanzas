@@ -3,7 +3,7 @@ name: Mantener SharedWallet activo
 on:
   schedule:
     # Cada 10 minutos
-    - cron: "7,17,27,37,47,57 * * * *"
+    - cron: '7,17,27,37,47,57 * * * *'
 
   # Permite ejecutarlo manualmente desde GitHub
   workflow_dispatch:
