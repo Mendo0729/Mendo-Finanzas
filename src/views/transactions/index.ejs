@@ -29,140 +29,159 @@
             </div>
           </div>
 
-          <section class="mf-form-panel mb-4" aria-labelledby="transaction-filters-title">
-            <div class="mf-form-panel__header">
-              <span class="mf-page-kicker">Consulta avanzada</span>
-              <h2 id="transaction-filters-title">Filtros de movimientos</h2>
-              <p>Combina uno o varios criterios. Los filtros se conservan al cambiar de página.</p>
+          <details class="mf-filter-panel mb-4"<%= hasActiveFilters ? ' open' : '' %>>
+            <summary aria-controls="transaction-filters-body">
+              <div class="mf-filter-panel__heading">
+                <span class="mf-page-kicker">Consulta avanzada</span>
+                <h2 id="transaction-filters-title">Filtros de movimientos</h2>
+                <p>Combina criterios y conserva los filtros al cambiar de página.</p>
+              </div>
+
+              <div class="mf-filter-panel__controls">
+                <% if (hasActiveFilters) { %>
+                  <span class="mf-filter-panel__status">Filtros activos</span>
+                <% } %>
+                <span class="mf-filter-panel__toggle">
+                  <span class="mf-filter-panel__toggle-closed">Mostrar filtros</span>
+                  <span class="mf-filter-panel__toggle-open">Ocultar filtros</span>
+                  <span class="mf-filter-panel__chevron" aria-hidden="true">⌄</span>
+                </span>
+              </div>
+            </summary>
+
+            <div
+              class="mf-filter-panel__body"
+              id="transaction-filters-body"
+              aria-labelledby="transaction-filters-title"
+            >
+              <form method="get" action="/transactions">
+                <div class="mf-form-grid">
+                  <div class="mf-form-field mf-form-field--8">
+                    <label for="search">Descripción</label>
+                    <input
+                      class="mf-input"
+                      id="search"
+                      name="search"
+                      maxlength="100"
+                      placeholder="Ej. supermercado"
+                      value="<%= filters.search %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--4">
+                    <label for="transactionType">Tipo</label>
+                    <select class="mf-select" id="transactionType" name="transactionType">
+                      <option value="">Todos</option>
+                      <% transactionTypes.forEach((type) => { %>
+                        <option
+                          value="<%= type.value %>"
+                          <%= Number(filters.transactionType) === type.value ? 'selected' : '' %>
+                        >
+                          <%= type.label %>
+                        </option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--6">
+                    <label for="fromDate">Desde</label>
+                    <input
+                      class="mf-input"
+                      id="fromDate"
+                      name="fromDate"
+                      type="date"
+                      value="<%= filters.fromDate %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--6">
+                    <label for="toDate">Hasta</label>
+                    <input
+                      class="mf-input"
+                      id="toDate"
+                      name="toDate"
+                      type="date"
+                      value="<%= filters.toDate %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--6">
+                    <label for="accountId">Cuenta</label>
+                    <select class="mf-select" id="accountId" name="accountId">
+                      <option value="">Todas las cuentas</option>
+                      <% accounts.forEach((account) => { %>
+                        <option
+                          value="<%= account.id %>"
+                          <%= filters.accountId === account.id ? 'selected' : '' %>
+                        >
+                          <%= account.name %> · <%= account.currency %>
+                        </option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--6">
+                    <label for="categoryId">Categoría</label>
+                    <select class="mf-select" id="categoryId" name="categoryId">
+                      <option value="">Todas las categorías</option>
+                      <% categories.forEach((category) => { %>
+                        <option
+                          value="<%= category.id %>"
+                          <%= filters.categoryId === category.id ? 'selected' : '' %>
+                        >
+                          <%= category.categoryType === 1 ? 'Ingreso' : 'Gasto' %> · <%=
+                          category.name %>
+                        </option>
+                      <% }) %>
+                    </select>
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--4">
+                    <label for="minAmount">Monto mínimo</label>
+                    <input
+                      class="mf-input"
+                      id="minAmount"
+                      name="minAmount"
+                      inputmode="decimal"
+                      placeholder="0.00"
+                      value="<%= filters.minAmount %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--4">
+                    <label for="maxAmount">Monto máximo</label>
+                    <input
+                      class="mf-input"
+                      id="maxAmount"
+                      name="maxAmount"
+                      inputmode="decimal"
+                      placeholder="0.00"
+                      value="<%= filters.maxAmount %>"
+                    />
+                  </div>
+
+                  <div class="mf-form-field mf-form-field--4">
+                    <label for="sort">Ordenar por</label>
+                    <select class="mf-select" id="sort" name="sort">
+                      <% sortOptions.forEach((option) => { %>
+                        <option
+                          value="<%= option.value %>"
+                          <%= filters.sort === option.value ? 'selected' : '' %>
+                        >
+                          <%= option.label %>
+                        </option>
+                      <% }) %>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="mf-form-actions">
+                  <button class="mf-button mf-button--primary" type="submit">Aplicar filtros</button>
+                  <a class="mf-button mf-button--ghost" href="/transactions">Limpiar</a>
+                </div>
+              </form>
             </div>
-
-            <form method="get" action="/transactions">
-              <div class="mf-form-grid">
-                <div class="mf-form-field mf-form-field--8">
-                  <label for="search">Descripción</label>
-                  <input
-                    class="mf-input"
-                    id="search"
-                    name="search"
-                    maxlength="100"
-                    placeholder="Ej. supermercado"
-                    value="<%= filters.search %>"
-                  />
-                </div>
-
-                <div class="mf-form-field mf-form-field--4">
-                  <label for="transactionType">Tipo</label>
-                  <select class="mf-select" id="transactionType" name="transactionType">
-                    <option value="">Todos</option>
-                    <% transactionTypes.forEach((type) => { %>
-                      <option
-                        value="<%= type.value %>"
-                        <%= Number(filters.transactionType) === type.value ? 'selected' : '' %>
-                      >
-                        <%= type.label %>
-                      </option>
-                    <% }) %>
-                  </select>
-                </div>
-
-                <div class="mf-form-field mf-form-field--6">
-                  <label for="fromDate">Desde</label>
-                  <input
-                    class="mf-input"
-                    id="fromDate"
-                    name="fromDate"
-                    type="date"
-                    value="<%= filters.fromDate %>"
-                  />
-                </div>
-
-                <div class="mf-form-field mf-form-field--6">
-                  <label for="toDate">Hasta</label>
-                  <input
-                    class="mf-input"
-                    id="toDate"
-                    name="toDate"
-                    type="date"
-                    value="<%= filters.toDate %>"
-                  />
-                </div>
-
-                <div class="mf-form-field mf-form-field--6">
-                  <label for="accountId">Cuenta</label>
-                  <select class="mf-select" id="accountId" name="accountId">
-                    <option value="">Todas las cuentas</option>
-                    <% accounts.forEach((account) => { %>
-                      <option
-                        value="<%= account.id %>"
-                        <%= filters.accountId === account.id ? 'selected' : '' %>
-                      >
-                        <%= account.name %> · <%= account.currency %>
-                      </option>
-                    <% }) %>
-                  </select>
-                </div>
-
-                <div class="mf-form-field mf-form-field--6">
-                  <label for="categoryId">Categoría</label>
-                  <select class="mf-select" id="categoryId" name="categoryId">
-                    <option value="">Todas las categorías</option>
-                    <% categories.forEach((category) => { %>
-                      <option
-                        value="<%= category.id %>"
-                        <%= filters.categoryId === category.id ? 'selected' : '' %>
-                      >
-                        <%= category.categoryType === 1 ? 'Ingreso' : 'Gasto' %> · <%=
-                        category.name %>
-                      </option>
-                    <% }) %>
-                  </select>
-                </div>
-
-                <div class="mf-form-field mf-form-field--4">
-                  <label for="minAmount">Monto mínimo</label>
-                  <input
-                    class="mf-input"
-                    id="minAmount"
-                    name="minAmount"
-                    inputmode="decimal"
-                    placeholder="0.00"
-                    value="<%= filters.minAmount %>"
-                  />
-                </div>
-
-                <div class="mf-form-field mf-form-field--4">
-                  <label for="maxAmount">Monto máximo</label>
-                  <input
-                    class="mf-input"
-                    id="maxAmount"
-                    name="maxAmount"
-                    inputmode="decimal"
-                    placeholder="0.00"
-                    value="<%= filters.maxAmount %>"
-                  />
-                </div>
-
-                <div class="mf-form-field mf-form-field--4">
-                  <label for="sort">Ordenar por</label>
-                  <select class="mf-select" id="sort" name="sort">
-                    <% sortOptions.forEach((option) => { %>
-                      <option
-                        value="<%= option.value %>"
-                        <%= filters.sort === option.value ? 'selected' : '' %>
-                      >
-                        <%= option.label %>
-                      </option>
-                    <% }) %>
-                  </select>
-                </div>
-              </div>
-
-              <div class="mf-form-actions">
-                <button class="mf-button mf-button--primary" type="submit">Aplicar filtros</button>
-                <a class="mf-button mf-button--ghost" href="/transactions">Limpiar</a>
-              </div>
-            </form>
-          </section>
+          </details>
 
           <div class="mf-page-intro">
             <div>
