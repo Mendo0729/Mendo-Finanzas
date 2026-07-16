@@ -1,0 +1,22 @@
+/* Security and MFA responsive components */
+.mf-qr-panel {
+  box-sizing: border-box;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.mf-qr-panel svg {
+  display: block;
+  width: min(100%, 280px);
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+@media (max-width: 720px) {
+  .mf-qr-panel {
+    width: min(100%, 320px);
+    margin-inline: auto;
+    padding: clamp(14px, 5vw, 22px);
+  }
+}
